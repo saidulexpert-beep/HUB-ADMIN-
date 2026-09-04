@@ -170,7 +170,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
                         <div class="stat-card p-6">
                             <h2 class="text-base font-bold mb-4 text-gray-800 flex items-center justify-between">
-                                <span>Live Stock Overview</span>
+                                <span>Live Stock Overview (Secondary DB)</span>
                                 <button onclick="loadStockOverview()" class="text-xs font-bold text-blue-600 hover:underline">Refresh</button>
                             </h2>
                             <div id="stock-overview-container" class="space-y-2.5 max-h-80 overflow-y-auto">
@@ -223,7 +223,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Manual / Pre-Order Delivery</h1>
-                            <p class="text-xs text-gray-500">স্টক আউটের প্রি-অর্ডার ডাটা দিয়ে ডেলিভারি বা রিফান্ড করুন</p>
+                            <p class="text-xs text-gray-500">স্টক আউটের প্রি-অর্ডার ডাটা দিয়ে ডেলিভারি বা রিফান্ড করুন (Secondary DB)</p>
                         </div>
                         <span class="text-xs bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-bold">Auto-Refund Monitored</span>
                     </div>
@@ -377,7 +377,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Bulk Stock Upload (বাল্ক স্টক আপলোড)</h1>
-                            <p class="text-xs text-gray-500">একসাথে শত শত স্টক নির্বিঘ্নে আপলোড করুন (কোনো লিমিট নেই)</p>
+                            <p class="text-xs text-gray-500">একসাথে শত শত স্টক নির্বিঘ্নে আপলোড করুন (Secondary DB)</p>
                         </div>
                         <button onclick="loadAddStockPage()" class="btn bg-gray-200 text-gray-800 text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reload Products</button>
                     </div>
@@ -665,17 +665,28 @@
 
     <!-- FIREBASE & CORE ENGINE -->
     <script type="module">
-        // 1. UPDATED AUTHORIZED ADMIN UID
+        // 1. AUTHORIZED ADMIN UID
         const TARGET_ADMIN_UID = "JeVQXKMTLEWo5O86RfXKLmk2bi43";
 
-        // 2. UNIFIED FIREBASE CONFIG (AS REQUESTED)
-        const firebaseConfig = {
+        // 2. PRIMARY FIREBASE CONFIG (Auth, Users, Balances, Config, Deposits, Withdrawals)
+        const primaryFirebaseConfig = {
             apiKey: "AIzaSyC_Qj_G_FOrlSehcj6qjdYB8x_G-yIyWnU",
             authDomain: "hub-54f3d.firebaseapp.com",
             projectId: "hub-54f3d",
             storageBucket: "hub-54f3d.firebasestorage.app",
             messagingSenderId: "379028334299",
             appId: "1:379028334299:web:20b8340f8115cd10de0efe"
+        };
+
+        // 3. SECONDARY FIREBASE CONFIG (Shop Stock, Purchases, Work Submissions & Accounts)
+        const secondaryFirebaseConfig = {
+            apiKey: "AIzaSyCagqvWu9t5Qp1IALosaP3-9jN52fhxQ2M",
+            authDomain: "saidul4x-78b68.firebaseapp.com",
+            databaseURL: "https://saidul4x-78b68-default-rtdb.firebaseio.com",
+            projectId: "saidul4x-78b68",
+            storageBucket: "saidul4x-78b68.firebasestorage.app",
+            messagingSenderId: "89460698631",
+            appId: "1:89460698631:web:827621e6358efeabce04a2"
         };
         
         import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -686,18 +697,26 @@
             runTransaction, orderBy, limit, getCountFromServer, increment, Timestamp, enableNetwork 
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // Unified Single Database Setup
-        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Initialize Primary Firebase (Default App)
+        const primaryApp = !getApps().some(a => a.name === '[DEFAULT]') 
+            ? initializeApp(primaryFirebaseConfig) 
+            : getApp();
 
-        // Aliases to maintain full system compatibility
-        const dbUser = db;
-        const dbShop = db;
-        const dbWork = db;
+        // Initialize Secondary Firebase (Named App)
+        const secondaryApp = !getApps().some(a => a.name === 'secondaryApp') 
+            ? initializeApp(secondaryFirebaseConfig, 'secondaryApp') 
+            : getApp('secondaryApp');
 
-        // Safeguard network
-        try { enableNetwork(db); } catch(e) {}
+        const auth = getAuth(primaryApp);
+        const dbUser = getFirestore(primaryApp);
+        const dbShop = getFirestore(secondaryApp);
+        const dbWork = getFirestore(secondaryApp);
+
+        // Safeguard network for both databases
+        try { 
+            enableNetwork(dbUser);
+            enableNetwork(dbShop);
+        } catch(e) {}
 
         const loginView = document.getElementById('admin-login-view');
         const dashboardView = document.getElementById('admin-dashboard');
@@ -931,7 +950,7 @@
 
         async function loadStockOverview() {
             const container = document.getElementById('stock-overview-container');
-            container.innerHTML = `<p class="text-sm text-gray-500">Checking stock levels...</p>`;
+            container.innerHTML = `<p class="text-sm text-gray-500">Checking stock levels in secondary DB...</p>`;
             await fetchAppConfig();
             if (!appConfig.mails || appConfig.mails.length === 0) {
                 container.innerHTML = `<p class="text-sm text-gray-500">No products configured.</p>`;
@@ -1111,7 +1130,7 @@
             });
         };
 
-        // --- MANUAL ORDERS ---
+        // --- MANUAL ORDERS (Secondary DB: dbShop) ---
         function loadManualOrders() {
             const tableBody = document.getElementById('manual-orders-table-body');
             tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-xs">Loading orders...</td></tr>`;
@@ -1182,8 +1201,16 @@
 
             showConfirm(`Are you sure you want to DELIVER this order to User TG ID: ${userId}?`, async () => {
                 try {
+                    const fullDeliveryString = accKey ? `${accData} | ${accKey}` : accData;
                     const moRef = doc(dbShop, "manual_orders", orderId);
-                    await updateDoc(moRef, { status: "approved", deliveredData: accData, deliveredPass: accKey, fulfilledAt: serverTimestamp() });
+                    
+                    await updateDoc(moRef, { 
+                        status: "approved", 
+                        deliveryData: fullDeliveryString,
+                        deliveredData: accData, 
+                        deliveredPass: accKey, 
+                        fulfilledAt: serverTimestamp() 
+                    });
 
                     const saleId = Date.now();
                     await addDoc(collection(dbShop, "purchases"), {
@@ -1222,7 +1249,7 @@
             });
         };
 
-        // --- MASTER WORK APPLICATIONS ---
+        // --- MASTER WORK APPLICATIONS (Secondary DB: dbWork) ---
         function loadMasterApplications() {
             const tableBody = document.getElementById('master-apps-table-body');
             tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading applications...</td></tr>`;
@@ -1294,7 +1321,7 @@
             });
         };
 
-        // --- WORK SUBMISSIONS ---
+        // --- WORK SUBMISSIONS (Secondary DB: dbWork) ---
         function loadWorkSubmissions() {
             const tableBody = document.getElementById('work-submissions-table-body');
             tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading work submissions...</td></tr>`;
@@ -1371,7 +1398,7 @@
             });
         };
 
-        // --- REPLACE REQUESTS ---
+        // --- REPLACE REQUESTS (Secondary DB: dbShop) ---
         function loadReplaceRequests() {
             const tableBody = document.getElementById('replace-table-body');
             tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading requests...</td></tr>`;
@@ -1393,8 +1420,8 @@
                         <td class="text-xs">${req.proof ? `<a href="${req.proof}" target="_blank" class="text-blue-600 font-bold underline">View Proof</a>` : 'None'}</td>
                         <td class="text-xs text-gray-500">${date}</td>
                         <td class="space-x-2 whitespace-nowrap">
-                            <button class="btn btn-success text-xs" onclick="window.handleReplaceAction('${docSnap.id}', '${req.userId}', ${req.cost}, '${req.purchaseId}', '${req.saleId}', '${req.mailType}', 'approved')">Approve & Refund</button>
-                            <button class="btn btn-danger text-xs" onclick="window.handleReplaceAction('${docSnap.id}', '${req.userId}', 0, '${req.purchaseId}', '${req.saleId}', '${req.mailType}', 'rejected')">Reject</button>
+                            <button class="btn btn-success text-xs" onclick="window.handleReplaceAction('${docSnap.id}', '${req.userId}', ${req.cost}, '${req.purchaseDocId || req.purchaseId}', '${req.saleId}', '${req.mailType}', 'approved')">Approve & Refund</button>
+                            <button class="btn btn-danger text-xs" onclick="window.handleReplaceAction('${docSnap.id}', '${req.userId}', 0, '${req.purchaseDocId || req.purchaseId}', '${req.saleId}', '${req.mailType}', 'rejected')">Reject</button>
                         </td></tr>`;
                 }).join('');
             });
@@ -1423,7 +1450,7 @@
             });
         };
 
-        // --- USERS MANAGEMENT ---
+        // --- USERS MANAGEMENT (Primary DB: dbUser) ---
         async function loadUsers(searchTerm = '') {
             const tableBody = document.getElementById('users-table-body');
             tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-xs">Loading users...</td></tr>`;
@@ -1530,7 +1557,7 @@
             } catch (error) { showAlert("Update failed: " + error.message); }
         }
 
-        // --- PURCHASES HISTORY ---
+        // --- PURCHASES HISTORY (Secondary DB: dbShop) ---
         async function loadMailPurchases() {
             const tableBody = document.getElementById('purchases-table-body');
             tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading purchases...</td></tr>`;
@@ -1554,7 +1581,7 @@
             }).join('');
         }
 
-        // ================= ACCOUNT SELL SERVICES CONFIG =================
+        // ================= ACCOUNT SELL SERVICES CONFIG (Secondary DB: dbWork) =================
         async function loadSellServicesConfig() {
             const container = document.getElementById('sell-services-container');
             container.innerHTML = `<p class="text-xs text-gray-500">Loading sell services...</p>`;
@@ -1679,6 +1706,7 @@
             });
 
             try {
+                // Secondary Database (dbWork)
                 const batch = writeBatch(dbWork);
                 const existingSnap = await getDocs(collection(dbWork, "sell_services"));
                 existingSnap.docs.forEach(d => batch.delete(d.ref));
@@ -1689,7 +1717,7 @@
 
                 await batch.commit();
 
-                // Sync with user app config
+                // Primary Database Configuration (dbUser)
                 await setDoc(doc(dbUser, "config", "main"), {
                     sellServices: newServices
                 }, { merge: true });
@@ -1700,7 +1728,7 @@
             }
         }
 
-        // ================= WORK JOBS MANAGEMENT =================
+        // ================= WORK JOBS MANAGEMENT (Secondary DB: dbWork) =================
         async function loadWorkJobsConfig() {
             await fetchAppConfig();
             document.getElementById('toggle-global-work').checked = appConfig.workSystemEnabled !== false;
@@ -1817,6 +1845,7 @@
             });
 
             try {
+                // Secondary Database (dbWork)
                 const batch = writeBatch(dbWork);
                 const existingSnap = await getDocs(collection(dbWork, "available_jobs"));
                 existingSnap.docs.forEach(d => batch.delete(d.ref));
@@ -1828,6 +1857,7 @@
 
                 await batch.commit();
 
+                // Primary Database Configuration (dbUser)
                 await setDoc(doc(dbUser, "config", "main"), {
                     workSystemEnabled: isGlobalWorkEnabled,
                     availableJobs: newJobs
@@ -1839,7 +1869,7 @@
             }
         }
 
-        // ================= DYNAMIC TASKS CONFIG =================
+        // ================= DYNAMIC TASKS CONFIG (Secondary DB: dbWork) =================
         async function loadDynamicTasksConfig() {
             const tasksContainer = document.getElementById('tasks-container');
             tasksContainer.innerHTML = `<p class="text-xs text-gray-500">Loading tasks...</p>`;
@@ -1968,6 +1998,7 @@
             });
 
             try {
+                // Secondary Database (dbWork)
                 const batch = writeBatch(dbWork);
                 const existingSnap = await getDocs(collection(dbWork, "tasks"));
                 existingSnap.docs.forEach(d => batch.delete(d.ref));
@@ -1994,6 +2025,7 @@
                     }
                 }
 
+                // Primary Database Configuration (dbUser)
                 await setDoc(doc(dbUser, "config", "main"), { tasks: newTasks }, { merge: true });
                 showAlert(`সফলভাবে ${newTasks.length} টি টাস্ক ডাটাবেসে সংরক্ষিত হয়েছে!`);
             } catch(e) {
@@ -2001,7 +2033,7 @@
             }
         }
 
-        // ================= BULK STOCK UPLOAD =================
+        // ================= BULK STOCK UPLOAD (Secondary DB: dbShop) =================
         async function loadAddStockPage() {
             await fetchAppConfig();
             const selectEl = document.getElementById('mail-type-select-add');
@@ -2097,7 +2129,7 @@
             }
         }
 
-        // --- MANAGE STOCK ITEMS ---
+        // --- MANAGE STOCK ITEMS (Secondary DB: dbShop) ---
         async function loadManageMailsPage() {
             await fetchAppConfig();
             const selectEl = document.getElementById('mail-type-select-manage');
@@ -2111,7 +2143,7 @@
         async function fetchAndDisplayMails(stockKey) {
             const container = document.getElementById('individual-mails-container');
             if (!stockKey) { container.innerHTML = '<p class="text-gray-400 text-sm">Please select a product type.</p>'; return; }
-            container.innerHTML = '<p class="text-sm text-gray-500 py-4">Fetching stock items...</p>';
+            container.innerHTML = '<p class="text-sm text-gray-500 py-4">Fetching stock items from secondary DB...</p>';
 
             try {
                 const q = query(collection(dbShop, stockKey), where("isSold", "==", false));
@@ -2176,7 +2208,7 @@
             navigator.clipboard.writeText(text).then(() => showAlert(`Copied ${snapshot.size} items to clipboard!`));
         };
 
-        // --- NOTIFICATIONS ---
+        // --- NOTIFICATIONS (Primary DB: dbUser) ---
         async function handleBroadcastNotification() {
             const title = document.getElementById('broadcast-title').value.trim();
             const message = document.getElementById('broadcast-message').value.trim();
@@ -2209,7 +2241,7 @@
             document.getElementById('direct-message').value = '';
         }
 
-        // ================= CONFIG LOADERS & SAVERS =================
+        // ================= CONFIG LOADERS & SAVERS (Primary DB: dbUser) =================
 
         // 1. PRODUCTS CONFIG
         async function loadProductsConfig() {
