@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center - GMAIL HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+        .sidebar { background-color: #0f172a; color: #94a3b8; }
+        .sidebar-heading { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; padding: 0.75rem 1.25rem 0.25rem; }
+        .sidebar a { border-left: 3px solid transparent; transition: all 0.2s; color: #cbd5e1; }
+        .sidebar a:hover { background-color: #1e293b; color: #ffffff; }
+        .sidebar a.active { background-color: #1e40af; color: white; border-left-color: #60a5fa; font-weight: 700; }
+        .stat-card { background-color: white; border-radius: 1rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.25s ease-in-out; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.6rem; font-weight: 700; transition: all 0.2s; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background-color: #1d4ed8; color: white; }
+        .btn-primary:hover { background-color: #1e40af; }
+        .btn-success { background-color: #10b981; color: white; }
+        .btn-success:hover { background-color: #059669; }
+        .btn-warning { background-color: #f59e0b; color: white; }
+        .btn-warning:hover { background-color: #d97706; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.85rem; text-align: left; border-bottom: 1px solid #e2e8f0; word-break: break-word; }
+        th { background-color: #f8fafc; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.70rem; letter-spacing: 0.05em; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal-content { background-color: white; padding: 1.5rem; border-radius: 1.25rem; max-width: 90%; width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN VIEW -->
+    <div id="admin-login-view" class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-3xl shadow-2xl border border-gray-100">
+            <div class="text-center">
+                <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/30">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-black text-gray-900">GMAIL HUB Admin</h1>
+                <p class="text-xs text-gray-500 mt-1">Please authenticate with Authorized Admin Credentials</p>
+                <div class="mt-2 py-1 px-3 bg-blue-50 rounded-lg text-[11px] font-mono text-blue-700 font-bold">
+                    Admin UID: PGlP7mf3kjPpLATWiseGP4A5Oyi2
+                </div>
+            </div>
+            <div class="space-y-4">
+                <input id="admin-email" type="email" placeholder="Admin Email" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                <input id="admin-password" type="password" placeholder="Password" class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                <button id="admin-login-btn" class="w-full btn btn-primary py-3.5 rounded-xl text-md font-bold shadow-lg shadow-blue-500/30">Login to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MAIN DASHBOARD VIEW -->
+    <div id="admin-dashboard" class="hidden">
+        <div class="flex h-screen overflow-hidden">
+            
+            <!-- SIDEBAR -->
+            <aside class="sidebar w-64 flex-shrink-0 overflow-y-auto border-r border-slate-800">
+                <div class="p-5 text-lg font-black text-white flex items-center gap-2.5 border-b border-slate-800">
+                    <div class="bg-blue-600 p-1.5 rounded-lg text-white">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                    </div>
+                    <span>𝐆𝐌𝐀𝐈𝐋 𝐇𝐔𝐁 𝐏𝐚𝐧𝐞𝐥</span>
+                </div>
+
+                <nav class="mt-2 pb-8 space-y-0.5">
+                    <!-- SECTION 1: OPERATIONS -->
+                    <div class="sidebar-heading">Core Management</div>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="dashboard-page"><i data-lucide="layout-dashboard" class="inline-block w-4 h-4 mr-3"></i>Dashboard</a>
+                    
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="withdrawals-page">
+                        <i data-lucide="arrow-down-to-line" class="inline-block w-4 h-4 mr-3 text-rose-400"></i>Withdrawals (উত্তোলন)
+                        <span id="nav-pending-withdrawals" class="ml-2 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </a>
+
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="deposits-page">
+                        <i data-lucide="arrow-down-circle" class="inline-block w-4 h-4 mr-3 text-emerald-400"></i>Deposits 
+                        <span id="nav-pending-deposits" class="ml-2 bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </a>
+
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="manual-orders-page">
+                        <i data-lucide="clock" class="inline-block w-4 h-4 mr-3 text-orange-400"></i>Manual Orders
+                        <span id="nav-pending-manual" class="ml-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </a>
+
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="master-apps-page">
+                        <i data-lucide="crown" class="inline-block w-4 h-4 mr-3 text-amber-400"></i>Master Training Apps
+                        <span id="nav-pending-master-apps" class="ml-2 bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </a>
+
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="work-submissions-page">
+                        <i data-lucide="briefcase" class="inline-block w-4 h-4 mr-3 text-amber-400"></i>Work Submissions
+                        <span id="nav-pending-work" class="ml-2 bg-amber-500 text-slate-900 text-[10px] font-black px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </a>
+
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="replace-page">
+                        <i data-lucide="refresh-cw" class="inline-block w-4 h-4 mr-3 text-purple-400"></i>Replace Requests
+                        <span id="nav-pending-replaces" class="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </a>
+
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="users-page"><i data-lucide="users" class="inline-block w-4 h-4 mr-3 text-blue-400"></i>Users & Activation</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="purchases-page"><i data-lucide="shopping-cart" class="inline-block w-4 h-4 mr-3 text-cyan-400"></i>Purchase Logs</a>
+
+                    <!-- SECTION 2: WORK & TASKS -->
+                    <div class="sidebar-heading mt-3">Work & Tasks Control</div>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-sell-services-page"><i data-lucide="badge-dollar-sign" class="inline-block w-4 h-4 mr-3 text-emerald-400"></i>Account Sell Services (Gmail/FB)</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-work-system-page"><i data-lucide="toggle-right" class="inline-block w-4 h-4 mr-3 text-amber-400"></i>Work Jobs & Control</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-tasks-page"><i data-lucide="check-square" class="inline-block w-4 h-4 mr-3 text-emerald-400"></i>Tasks (Join, Visit, Bot Keys)</a>
+
+                    <!-- SECTION 3: INVENTORY -->
+                    <div class="sidebar-heading mt-3">Stock & Inventory</div>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="stock-page"><i data-lucide="package-plus" class="inline-block w-4 h-4 mr-3 text-indigo-400"></i>Bulk Add Stock</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="manage-mails-page"><i data-lucide="database" class="inline-block w-4 h-4 mr-3 text-teal-400"></i>Manage Unsold Items</a>
+
+                    <!-- SECTION 4: COMMUNICATIONS -->
+                    <div class="sidebar-heading mt-3">Messaging</div>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="notifications-page"><i data-lucide="send" class="inline-block w-4 h-4 mr-3 text-sky-400"></i>Push Notifications</a>
+
+                    <!-- SECTION 5: STORE SETTINGS -->
+                    <div class="sidebar-heading mt-3">Store Settings</div>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-products-page"><i data-lucide="package" class="inline-block w-4 h-4 mr-3 text-yellow-400"></i>Products & Services</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-categories-page"><i data-lucide="layout-grid" class="inline-block w-4 h-4 mr-3 text-pink-400"></i>Main Categories</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-payments-page"><i data-lucide="credit-card" class="inline-block w-4 h-4 mr-3 text-green-400"></i>Payment Numbers</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-rules-page"><i data-lucide="sliders" class="inline-block w-4 h-4 mr-3 text-orange-400"></i>Order Rules & Fees</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-support-page"><i data-lucide="headphones" class="inline-block w-4 h-4 mr-3 text-emerald-400"></i>Telegram Bot & Support</a>
+
+                    <a href="#" id="admin-logout-btn" class="block py-3 px-5 mt-6 text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition"><i data-lucide="log-out" class="inline-block w-4 h-4 mr-3"></i>Logout</a>
+                </nav>
+            </aside>
+
+            <!-- MAIN RIGHT CONTENT CONTAINER -->
+            <main class="flex-1 p-8 overflow-y-auto bg-[#f8fafc]">
+
+                <!-- 1. DASHBOARD PAGE -->
+                <div id="dashboard-page" class="page">
+                    <h1 class="text-2xl font-extrabold mb-6 text-gray-800">System Overview</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div class="stat-card p-5 border-l-4 border-indigo-500">
+                            <h2 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Users</h2>
+                            <p id="total-users" class="text-3xl font-black mt-2 text-indigo-600">0</p>
+                        </div>
+                        <div class="stat-card p-5 border-l-4 border-green-500">
+                            <h2 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Approved Deposits</h2>
+                            <p id="total-deposits-amount" class="text-3xl font-black mt-2 text-green-600">৳0</p>
+                        </div>
+                        <div class="stat-card p-5 border-l-4 border-rose-500">
+                            <h2 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Approved Withdrawals</h2>
+                            <p id="total-withdrawals-amount" class="text-3xl font-black mt-2 text-rose-600">৳0</p>
+                        </div>
+                        <div class="stat-card p-5 border-l-4 border-orange-500">
+                            <h2 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Pending Action Queue</h2>
+                            <div class="mt-2 text-xs font-semibold space-y-1">
+                                <p>Withdrawals: <span id="pending-withdrawals-count" class="text-rose-600 font-bold">0</span></p>
+                                <p>Deposits: <span id="pending-deposits" class="text-green-600 font-bold">0</span></p>
+                                <p>Training Apps: <span id="pending-master-count" class="text-amber-600 font-bold">0</span></p>
+                                <p>Work Submissions: <span id="pending-work-count" class="text-indigo-600 font-bold">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                        <div class="stat-card p-6">
+                            <h2 class="text-base font-bold mb-4 text-gray-800 flex items-center justify-between">
+                                <span>Live Stock Overview</span>
+                                <button onclick="loadStockOverview()" class="text-xs font-bold text-blue-600 hover:underline">Refresh</button>
+                            </h2>
+                            <div id="stock-overview-container" class="space-y-2.5 max-h-80 overflow-y-auto">
+                                <p class="text-sm text-gray-400">Loading stock data...</p>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6">
+                            <h2 class="text-base font-bold mb-4 text-gray-800">User Registrations (Last 7 Days)</h2>
+                            <canvas id="user-chart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. WITHDRAWALS PAGE -->
+                <div id="withdrawals-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">উত্তোলন রিকোয়েস্ট (Withdrawal Requests)</h1>
+                            <p class="text-xs text-gray-500">পেমেন্ট পাঠিয়ে Approve করলে ইউজারের টেলিগ্রামে কনফার্মেশন যাবে (Reject করলে স্বয়ংক্রিয় রিফান্ড)</p>
+                        </div>
+                        <span class="text-xs bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-bold">Withdrawal Queue</span>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>User Info</th><th>E-Wallet Details</th><th>Amount & Fee</th><th>Requested At</th><th>Actions</th></tr></thead>
+                            <tbody id="withdrawals-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. DEPOSITS PAGE -->
+                <div id="deposits-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Deposit Requests</h1>
+                            <p class="text-xs text-gray-500">ম্যানুয়াল ডিপোজিট যাচাই করে অনুমোদন বা বাতিল করুন (ইন-অ্যাপ নোটিফিকেশনে ফলাফল যাবে)</p>
+                        </div>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold">Realtime Live</span>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>User Info</th><th>Amount</th><th>Method</th><th>TrxID</th><th>Date & Time</th><th>Actions</th></tr></thead>
+                            <tbody id="deposits-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. MANUAL ORDERS PAGE -->
+                <div id="manual-orders-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Manual / Pre-Order Delivery</h1>
+                            <p class="text-xs text-gray-500">স্টক আউটের প্রি-অর্ডার ডাটা দিয়ে ডেলিভারি বা রিফান্ড করুন</p>
+                        </div>
+                        <span class="text-xs bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-bold">Auto-Refund Monitored</span>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>User Info</th><th>Service / Quantity / Cost</th><th>Time Remaining</th><th>Account Data to Deliver</th><th>Actions</th></tr></thead>
+                            <tbody id="manual-orders-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 5. MASTER TRAINING APPLICATIONS PAGE -->
+                <div id="master-apps-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Master Work ট্রেনিং আবেদনসমূহ</h1>
+                            <p class="text-xs text-gray-500">অ্যাপ্রুভ করলে ইউজারের কাছে টেলিগ্রামে মেসেজ যাবে। রিজেক্ট করলে ইউজার ২৪ ঘণ্টা পর পুনরায় আবেদন করতে পারবেন।</p>
+                        </div>
+                        <span class="text-xs bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-bold">Live Training Review</span>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>User Info</th><th>Contact Method</th><th>Free Time & Experience</th><th>Expectations</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody id="master-apps-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 6. WORK SUBMISSIONS PAGE -->
+                <div id="work-submissions-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Work Submissions (VIP 0 & Master Tasks)</h1>
+                            <p class="text-xs text-gray-500">ব্যবহারকারীদের জমা দেওয়া কাজের প্রুফ (Gmail/Pass/2FA) যাচাই করে ব্যালেন্স অ্যাপ্রুভ করুন</p>
+                        </div>
+                        <span class="text-xs bg-indigo-100 text-indigo-900 px-3 py-1 rounded-full font-bold">Task Review Engine</span>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>User Info</th><th>Task Type</th><th>Reward</th><th>Submitted Data (Credentials)</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody id="work-submissions-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 7. REPLACE REQUESTS PAGE -->
+                <div id="replace-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Replace & Refund Requests</h1>
+                            <p class="text-xs text-gray-500">ক্রয়কৃত আইটেমের সমস্যা পর্যালোচনার তালিকা</p>
+                        </div>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>User</th><th>Sale ID / Product</th><th>Cost</th><th>Reason</th><th>Proof</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody id="replace-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 8. USERS MANAGEMENT PAGE -->
+                <div id="users-page" class="page">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">User Management & Activation</h1>
+                            <p class="text-xs text-gray-500">ব্যবহারকারীদের ব্যালেন্স, অ্যাক্টিভেশন স্ট্যাটাস ও মাস্টার পারমিশন</p>
+                        </div>
+                        <input type="text" id="user-search" class="w-full max-w-sm px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Search by Name or Telegram ID...">
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead><tr><th>User</th><th>Telegram ID</th><th>Username</th><th>Account Active?</th><th>Master Work?</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="users-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 9. PURCHASES HISTORY PAGE -->
+                <div id="purchases-page" class="page">
+                    <h1 class="text-2xl font-bold mb-6 text-gray-800">Item Purchase Logs</h1>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                       <table>
+                           <thead><tr><th>Sale ID</th><th>Date</th><th>User</th><th>Product</th><th>Credentials / Data</th><th>Price</th><th>Refunded?</th></tr></thead>
+                           <tbody id="purchases-table-body"></tbody>
+                       </table>
+                   </div>
+                </div>
+
+                <!-- 10. NEW: ACCOUNT SELL SERVICES MANAGEMENT (dbWork) -->
+                <div id="set-sell-services-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Account Sell Services (Gmail, FB, etc.)</h1>
+                            <p class="text-xs text-gray-500">ইউজার অ্যাপের অ্যাকাউন্ট সেল পেজের রেট পরিবর্তন করুন, কাজ অন/অফ রাখুন অথবা নতুন কাজের বিভাগ যোগ করুন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-sell-service-btn" class="btn bg-gray-800 text-white text-xs">+ Add New Sell Service</button>
+                            <button id="save-sell-services-btn" class="btn btn-primary text-xs shadow-md">Save All Sell Services</button>
+                        </div>
+                    </div>
+                    <div id="sell-services-container" class="space-y-4"></div>
+                </div>
+
+                <!-- 11. WORK SYSTEM & JOBS MANAGEMENT -->
+                <div id="set-work-system-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Work Marketplace & Jobs Control</h1>
+                            <p class="text-xs text-gray-500">অ্যাপের কাজ চালু বা বন্ধ রাখুন এবং কাজের ধরন ও বিবরণ পরিবর্তন করুন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-job-btn" class="btn bg-gray-800 text-white text-xs">+ Create New Job</button>
+                            <button id="save-work-settings-btn" class="btn btn-primary text-xs shadow-md">Save Work Settings</button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card p-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-gray-800">Global Work Marketplace System</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">এটি বন্ধ করলে ইউজার অ্যাপে সব ধরনের কাজ সাময়িক স্থগিত দেখাবে।</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle-global-work" class="sr-only peer">
+                                <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="jobs-container" class="space-y-4"></div>
+                </div>
+
+                <!-- 12. DYNAMIC TASKS CONFIGURATION PAGE -->
+                <div id="set-tasks-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Dynamic Tasks Management</h1>
+                            <p class="text-xs text-gray-500">ইউজারদের জন্য Telegram Join (বট ভেরিফাইড), Website Visit এবং Bot Secret Key টাস্ক পরিচালনা করুন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-task-btn" class="btn bg-gray-800 text-white text-xs">+ Create New Task</button>
+                            <button id="save-tasks-btn" class="btn btn-primary text-xs shadow-md">Save All Tasks</button>
+                        </div>
+                    </div>
+                    <div id="tasks-container" class="space-y-4"></div>
+                </div>
+
+                <!-- 13. ADD STOCK PAGE (FIXED & HIGH CAPACITY) -->
+                <div id="stock-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Bulk Stock Upload (বাল্ক স্টক আপলোড)</h1>
+                            <p class="text-xs text-gray-500">একসাথে শত শত স্টক নির্বিঘ্নে আপলোড করুন (কোনো লিমিট নেই)</p>
+                        </div>
+                        <button onclick="loadAddStockPage()" class="btn bg-gray-200 text-gray-800 text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reload Products</button>
+                    </div>
+
+                    <div class="stat-card p-6 max-w-2xl">
+                        <div class="mb-4">
+                            <label for="mail-type-select-add" class="block text-xs font-bold text-gray-700 mb-1">Target Product (প্রোডাক্ট নির্বাচন করুন)</label>
+                            <select id="mail-type-select-add" class="w-full p-2.5 rounded-xl border border-gray-300 text-sm font-semibold bg-white"></select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="mail-data-textarea" class="block text-xs font-bold text-gray-700 mb-1">Stock Data (স্টক ডাটা পেস্ট করুন)</label>
+                            <p class="text-[11px] text-gray-500 mb-2">সমর্থিত ফরম্যাট: <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-800">email/password</code> অথবা <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-800">email:password</code> অথবা <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-800">single_token</code> (প্রতি লাইনে ১টি)</p>
+                            <textarea id="mail-data-textarea" rows="11" placeholder="item@example.com/password&#10;item2@example.com/pass123" class="w-full p-3 rounded-xl border border-gray-300 font-mono text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                        </div>
+
+                        <div id="upload-progress-box" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs font-bold text-blue-700 flex items-center gap-2">
+                            <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                            <span id="upload-progress-text">Uploading items in chunks...</span>
+                        </div>
+
+                        <button id="add-mails-btn" class="btn btn-primary w-full py-3.5 rounded-xl text-sm shadow-md">Upload Stock to Firebase</button>
+                    </div>
+                </div>
+
+                <!-- 14. MANAGE STOCK ITEMS PAGE -->
+                <div id="manage-mails-page" class="page">
+                    <h1 class="text-2xl font-bold mb-6 text-gray-800">Manage Unsold Inventory</h1>
+                    <div class="stat-card p-6">
+                        <div class="mb-4 max-w-md">
+                            <label for="mail-type-select-manage" class="block text-xs font-bold text-gray-700 mb-1">Select Product to Inspect Stock</label>
+                            <select id="mail-type-select-manage" class="w-full p-2.5 rounded-xl border border-gray-300 text-sm font-semibold bg-white"></select>
+                        </div>
+                        <div id="individual-mails-container" class="overflow-x-auto pt-2">
+                            <p class="text-gray-400 text-sm">Please select a product above to inspect inventory.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 15. PUSH NOTIFICATIONS PAGE -->
+                <div id="notifications-page" class="page">
+                    <h1 class="text-2xl font-bold mb-6 text-gray-800">Push Notifications Center</h1>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="stat-card p-6">
+                            <h2 class="text-base font-bold mb-4 flex items-center gap-2 text-blue-700"><i data-lucide="radio" class="w-5 h-5"></i> Broadcast (All Users)</h2>
+                            <div class="space-y-4">
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Title</label><input type="text" id="broadcast-title" class="w-full px-3 py-2 border rounded-xl text-sm"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Message</label><textarea id="broadcast-message" rows="4" class="w-full px-3 py-2 border rounded-xl text-sm"></textarea></div>
+                                <button id="send-broadcast-btn" class="w-full btn btn-primary py-2.5">Send Broadcast Notice</button>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6">
+                            <h2 class="text-base font-bold mb-4 flex items-center gap-2 text-indigo-700"><i data-lucide="user-check" class="w-5 h-5"></i> Direct In-App User Message</h2>
+                            <div class="space-y-4">
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Telegram User ID</label><input type="text" id="direct-user-id" class="w-full px-3 py-2 border rounded-xl text-sm" placeholder="e.g. 6954647230"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Title</label><input type="text" id="direct-title" class="w-full px-3 py-2 border rounded-xl text-sm"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Message</label><textarea id="direct-message" rows="4" class="w-full px-3 py-2 border rounded-xl text-sm"></textarea></div>
+                                <button id="send-direct-btn" class="w-full btn btn-primary py-2.5">Send In-App Notification</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 16. PRODUCTS & SERVICES SETTINGS PAGE -->
+                <div id="set-products-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Products & Services Configuration</h1>
+                            <p class="text-xs text-gray-500">অ্যাপের সকল সার্ভিস, মূল্য, ক্যাটাগরি ও বিবরণ নিয়ন্ত্রণ করুন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-mail-type-btn" class="btn bg-gray-800 text-white text-xs">+ Add Product</button>
+                            <button id="save-products-btn" class="btn btn-primary text-xs shadow-md">Save Products</button>
+                        </div>
+                    </div>
+                    <div id="mail-types-container" class="space-y-4"></div>
+                </div>
+
+                <!-- 17. MAIN CATEGORIES SETTINGS PAGE -->
+                <div id="set-categories-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Home Categories Management</h1>
+                            <p class="text-xs text-gray-500">হোম স্ক্রিনের ক্যাটাগরি ফিল্টার বাটন ও আইকন কনফিগারেশন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-category-btn" class="btn bg-gray-800 text-white text-xs">+ Add Category</button>
+                            <button id="save-categories-btn" class="btn btn-primary text-xs shadow-md">Save Categories</button>
+                        </div>
+                    </div>
+                    <div class="stat-card p-6">
+                        <div id="categories-container" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- 18. PAYMENT NUMBERS SETTINGS PAGE -->
+                <div id="set-payments-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Payment Numbers Configuration</h1>
+                            <p class="text-xs text-gray-500">বিকাশ, নগদ বা রকেট নম্বর পরিবর্তন করুন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-payment-method-btn" class="btn bg-gray-800 text-white text-xs">+ Add Method</button>
+                            <button id="save-payments-btn" class="btn btn-primary text-xs shadow-md">Save Payment Numbers</button>
+                        </div>
+                    </div>
+                    <div class="stat-card p-6">
+                        <div id="payment-methods-container" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- 19. ORDER RULES & ACTIVATION SETTINGS PAGE -->
+                <div id="set-rules-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Order Rules, Fees & Activation</h1>
+                            <p class="text-xs text-gray-500">স্টক আউট প্রি-অর্ডার, অ্যাকাউন্ট অ্যাক্টিভেশন ফি এবং রেফারেল বোনাস নির্ধারণ</p>
+                        </div>
+                        <button id="save-rules-btn" class="btn btn-primary text-xs shadow-md">Save Settings</button>
+                    </div>
+
+                    <div class="stat-card p-6 max-w-2xl space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                                <label class="block text-xs font-black text-blue-950 mb-1">অ্যাকাউন্ট অ্যাক্টিভেশন ফি (BDT)</label>
+                                <p class="text-[11px] text-blue-800 mb-2">ইউজারের অ্যাকাউন্ট সক্রিয় করতে কত টাকা কাটা হবে</p>
+                                <input type="number" step="1" id="rule-activation-fee" class="w-full p-2.5 border rounded-xl text-sm font-bold text-blue-700 bg-white" placeholder="10">
+                            </div>
+
+                            <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                                <label class="block text-xs font-black text-emerald-950 mb-1">রেফারেল বোনাস (BDT)</label>
+                                <p class="text-[11px] text-emerald-800 mb-2">বন্ধু অ্যাকাউন্ট অ্যাক্টিভ করলে ইনভাইটার কত টাকা পাবে</p>
+                                <input type="number" step="1" id="rule-referral-bonus" class="w-full p-2.5 border rounded-xl text-sm font-bold text-emerald-700 bg-white" placeholder="10">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border border-orange-200">
+                            <div>
+                                <h3 class="text-sm font-bold text-orange-950">Allow Manual 'Order Now' When Out of Stock</h3>
+                                <p class="text-xs text-orange-800 mt-0.5">স্টক শূন্য হলে ইউজারদের প্রি-অর্ডার করার সুবিধা চালু বা বন্ধ রাখুন</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="rule-allow-manual" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Manual Order Timeout (Minutes)</label>
+                            <p class="text-xs text-gray-500 mb-2">কত মিনিটের মধ্যে অ্যাডমিন ডেলিভারি না দিলে ব্যালেন্স স্বয়ংক্রিয়ভাবে রিফান্ড হবে</p>
+                            <input type="number" id="rule-timeout-minutes" class="w-full max-w-xs p-2.5 border rounded-xl text-sm font-bold text-blue-600" placeholder="30">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20. BOT & SUPPORT LINKS & CUSTOM MESSAGES SETTINGS PAGE -->
+                <div id="set-support-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Telegram Bot, Support & Custom Messages</h1>
+                            <p class="text-xs text-gray-500">বট টোকেন, এডমিন আইডি এবং টেলিগ্রাম অটোমেটিক মেসেজ ফরম্যাট পরিবর্তন</p>
+                        </div>
+                        <button id="save-support-btn" class="btn btn-primary text-xs shadow-md">Save Settings</button>
+                    </div>
+
+                    <div class="stat-card p-6 max-w-2xl space-y-4">
+                        <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                            <label class="block text-xs font-extrabold text-emerald-950 mb-1">Telegram Bot Token</label>
+                            <p class="text-[11px] text-emerald-800 mb-2">ইউজারকে উইথড্র ও মাস্টার এপ্রুভাল নোটিফিকেশন পাঠানোর জন্য ব্যবহৃত হবে।</p>
+                            <input type="text" id="setting-bot-token" class="w-full p-2.5 border rounded-xl text-xs font-mono font-bold bg-white" placeholder="123456789:ABCDefGhIJKlmNoPQRsTUVwxyZ">
+                        </div>
+
+                        <div class="p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                            <label class="block text-xs font-extrabold text-blue-950 mb-1">Telegram Admin Chat ID (For Master Notifications)</label>
+                            <p class="text-[11px] text-blue-800 mb-2">মাস্টার কাজের আবেদন সরাসরি এই টেলিগ্রাম আইডিতে পাঠানো হবে।</p>
+                            <input type="text" id="setting-admin-chat-id" class="w-full p-2.5 border rounded-xl text-xs font-mono font-bold bg-white" placeholder="6954647230">
+                        </div>
+
+                        <!-- CUSTOM TELEGRAM MESSAGES CONFIG -->
+                        <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 space-y-3">
+                            <h3 class="text-xs font-black text-purple-950 uppercase">ইউজারের টেলিগ্রাম মেসেজ টেমপ্লেট</h3>
+                            
+                            <div>
+                                <label class="block text-[11px] font-bold text-purple-900 mb-1">উইথড্র সফল হলে মেসেজ ({amount} এবং {method} স্বয়ংক্রিয় রিপ্লেস হবে):</label>
+                                <textarea id="msg-withdraw-success" rows="2" class="w-full p-2.5 border rounded-xl text-xs bg-white"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-purple-900 mb-1">মাস্টার ট্রেনিং আবেদন অনুমোদিত (Approved) হলে মেসেজ:</label>
+                                <textarea id="msg-master-approved" rows="2" class="w-full p-2.5 border rounded-xl text-xs bg-white"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-purple-900 mb-1">মাস্টার ট্রেনিং আবেদন বাতিল (Rejected) হলে মেসেজ:</label>
+                                <textarea id="msg-master-rejected" rows="2" class="w-full p-2.5 border rounded-xl text-xs bg-white"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Telegram Support Link</label>
+                                <input type="url" id="support-telegram" class="w-full p-2.5 border rounded-xl text-sm" placeholder="https://t.me/EXPERTearn_team">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">WhatsApp Support Link</label>
+                                <input type="url" id="support-whatsapp" class="w-full p-2.5 border rounded-xl text-sm" placeholder="https://wa.me/8801827750260">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Telegram Channel URL</label>
+                                <input type="url" id="support-channel" class="w-full p-2.5 border rounded-xl text-sm" placeholder="https://t.me/EXPERTearn_team">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Telegram Bot Username (without @)</label>
+                                <input type="text" id="support-bot-username" class="w-full p-2.5 border rounded-xl text-sm" placeholder="Gmail_HUB7bot">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- USER BALANCE & ACTIVATION MODAL -->
+    <div id="balance-modal" class="modal-overlay hidden">
+        <div class="modal-content !w-[480px]">
+            <h2 id="balance-modal-title" class="text-lg font-bold mb-4 text-gray-800">Manage User Account</h2>
+            <form id="balance-form" class="space-y-4">
+                <input type="hidden" id="balance-user-id">
+                <div class="p-3.5 bg-gray-50 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-gray-500 block">Current Balance</span>
+                        <span id="current-balance-display" class="font-black text-blue-600 text-base">৳0.00</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-500 block">Activation</span>
+                        <span id="current-active-display" class="font-bold text-xs px-2 py-0.5 rounded-md">--</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Account Active?</label>
+                        <select id="user-active-select" class="w-full p-2.5 border rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50">
+                            <option value="true">Active (সক্রিয়)</option>
+                            <option value="false">Inactive (নিষ্ক্রিয়)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Master Work Unlocked?</label>
+                        <select id="user-master-select" class="w-full p-2.5 border rounded-xl text-xs font-bold text-amber-700 bg-amber-50">
+                            <option value="true">Unlocked (50৳ Paid)</option>
+                            <option value="false">Locked</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Balance Action</label>
+                    <select id="balance-action" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+                        <option value="add">Add to Balance (+)</option>
+                        <option value="deduct">Deduct from Balance (-)</option>
+                        <option value="set">Set Exact Balance (=)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Amount (BDT)</label>
+                    <input type="number" id="balance-amount" step="0.01" value="0" class="w-full p-2.5 border rounded-xl text-sm font-bold" required>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-3 border-t">
+                    <button type="button" id="balance-modal-cancel" class="btn bg-gray-200 text-gray-700 text-xs">Cancel</button>
+                    <button type="submit" class="btn btn-primary text-xs">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ALERT & CONFIRM MODALS -->
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl"><p id="alert-message" class="mb-4 text-gray-800 text-sm font-medium whitespace-pre-wrap"></p><button id="alert-ok-btn" class="btn btn-primary px-6 text-xs">OK</button></div></div>
+    <div id="custom-confirm" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl"><p id="confirm-message" class="mb-6 text-gray-800 text-sm font-medium"></p><div class="flex justify-center space-x-3"><button id="confirm-cancel-btn" class="btn bg-gray-200 text-gray-800 text-xs px-5">Cancel</button><button id="confirm-ok-btn" class="btn btn-danger text-xs px-5">Confirm</button></div></div></div>
+
+    <!-- FIREBASE & CORE ENGINE -->
+    <script type="module">
+        const TARGET_ADMIN_UID = "PGlP7mf3kjPpLATWiseGP4A5Oyi2";
+
+        // 1. PRIMARY APP (FOR AUTH, USERS, DEPOSITS, WITHDRAWALS & GLOBAL CONFIG)
+        const userFirebaseConfig = {
+            apiKey: "AIzaSyBopnlRjMScCBaKaxvYsZesAvzxtEjSFRw",
+            authDomain: "rkrj-abffe.firebaseapp.com",
+            databaseURL: "https://rkrj-abffe-default-rtdb.firebaseio.com",
+            projectId: "rkrj-abffe",
+            storageBucket: "rkrj-abffe.firebasestorage.app",
+            messagingSenderId: "677055084635",
+            appId: "1:677055084635:web:fe5010f2fc94e76d0e277e"
+        };
+
+        // 2. SHOP & WORK SHARED FIREBASE CONFIG
+        const sharedShopWorkFirebaseConfig = {
+            apiKey: "AIzaSyALek-biuraaH0F8w2tVmLIToB7WvCMANY",
+            authDomain: "xadminbd-8c45b.firebaseapp.com",
+            databaseURL: "https://xadminbd-8c45b-default-rtdb.firebaseio.com",
+            projectId: "xadminbd-8c45b",
+            storageBucket: "xadminbd-8c45b.firebasestorage.app",
+            messagingSenderId: "366297743215",
+            appId: "1:366297743215:web:46b005f88734d51b6cb29a",
+            measurementId: "G-4LXNTDMMZ6"
+        };
+        
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, getDoc, setDoc, updateDoc, query, where, 
+            onSnapshot, addDoc, serverTimestamp, deleteDoc, writeBatch, getDocs, 
+            runTransaction, orderBy, limit, getCountFromServer, increment, Timestamp, enableNetwork 
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // Multi-Database Setup
+        const appUser = !getApps().length ? initializeApp(userFirebaseConfig) : getApp();
+        const appShopWork = initializeApp(sharedShopWorkFirebaseConfig, "adminShopWorkApp");
+
+        const auth = getAuth(appUser);
+        const dbUser = getFirestore(appUser);
+        const dbShop = getFirestore(appShopWork);
+        const dbWork = getFirestore(appShopWork);
+
+        // Safeguard network
+        try { enableNetwork(dbUser); } catch(e) {}
+        try { enableNetwork(dbShop); } catch(e) {}
+
+        const loginView = document.getElementById('admin-login-view');
+        const dashboardView = document.getElementById('admin-dashboard');
+        let appConfig = {};
+        let userChart = null;
+        let depositUnsubscribe = null;
+        let manualUnsubscribe = null;
+        let workUnsubscribe = null;
+        let replaceUnsubscribe = null;
+        let withdrawUnsubscribe = null;
+        let masterAppUnsubscribe = null;
+        let liveTimerInterval = null;
+
+        window.onload = () => {
+            lucide.createIcons();
+            setupEventListeners();
+            
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    if (user.uid !== TARGET_ADMIN_UID) {
+                        await signOut(auth);
+                        showAlert(`প্রবেশাধিকার নেই! আপনি অনুমোদিত অ্যাডমিন নন।\nআপনার UID: ${user.uid}\nপ্রয়োজনীয় UID: ${TARGET_ADMIN_UID}`);
+                        loginView.style.display = 'flex';
+                        dashboardView.style.display = 'none';
+                        return;
+                    }
+
+                    loginView.style.display = 'none';
+                    dashboardView.style.display = 'block';
+                    navigateTo('dashboard-page');
+                    startLiveCounters();
+                    startCountdownTimerRoutine();
+                } else {
+                    loginView.style.display = 'flex';
+                    dashboardView.style.display = 'none';
+                }
+            });
+        };
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId)?.classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.toggle('active', link.dataset.page === pageId);
+            });
+            
+            if (depositUnsubscribe && pageId !== 'deposits-page') { depositUnsubscribe(); depositUnsubscribe = null; }
+            if (manualUnsubscribe && pageId !== 'manual-orders-page') { manualUnsubscribe(); manualUnsubscribe = null; }
+            if (workUnsubscribe && pageId !== 'work-submissions-page') { workUnsubscribe(); workUnsubscribe = null; }
+            if (replaceUnsubscribe && pageId !== 'replace-page') { replaceUnsubscribe(); replaceUnsubscribe = null; }
+            if (withdrawUnsubscribe && pageId !== 'withdrawals-page') { withdrawUnsubscribe(); withdrawUnsubscribe = null; }
+            if (masterAppUnsubscribe && pageId !== 'master-apps-page') { masterAppUnsubscribe(); masterAppUnsubscribe = null; }
+
+            const pageFunctions = {
+                'dashboard-page': loadDashboardData,
+                'withdrawals-page': loadWithdrawals,
+                'deposits-page': loadDeposits,
+                'manual-orders-page': loadManualOrders,
+                'master-apps-page': loadMasterApplications,
+                'work-submissions-page': loadWorkSubmissions,
+                'replace-page': loadReplaceRequests,
+                'users-page': () => loadUsers(),
+                'purchases-page': loadMailPurchases,
+                'set-sell-services-page': loadSellServicesConfig,
+                'set-work-system-page': loadWorkJobsConfig,
+                'set-tasks-page': loadDynamicTasksConfig,
+                'stock-page': loadAddStockPage,
+                'manage-mails-page': loadManageMailsPage,
+                'notifications-page': () => {},
+                'set-products-page': loadProductsConfig,
+                'set-categories-page': loadCategoriesConfig,
+                'set-payments-page': loadPaymentsConfig,
+                'set-rules-page': loadOrderRulesConfig,
+                'set-support-page': loadBotAndSupportConfig
+            };
+            pageFunctions[pageId]?.();
+            lucide.createIcons();
+        }
+
+        async function fetchAppConfig() {
+            try {
+                const configRef = doc(dbUser, "config", "main");
+                const docSnap = await getDoc(configRef);
+                appConfig = docSnap.exists() ? docSnap.data() : {};
+                if (!appConfig.mails) appConfig.mails = [];
+                if (!appConfig.categories) appConfig.categories = [];
+                if (!appConfig.paymentMethods) appConfig.paymentMethods = [];
+                if (!appConfig.tasks) appConfig.tasks = [];
+                if (!appConfig.availableJobs) appConfig.availableJobs = [];
+                return appConfig;
+            } catch (error) {
+                return { mails: [], categories: [], paymentMethods: [], tasks: [], availableJobs: [] };
+            }
+        }
+
+        // --- DIRECT TELEGRAM MESSAGE DISPATCHER ---
+        async function sendTelegramDirectMessage(chatId, text) {
+            await fetchAppConfig();
+            const botToken = appConfig.botToken || "";
+            if (!botToken || !chatId || !text) return;
+            try {
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: String(chatId), text: text, parse_mode: 'HTML' })
+                });
+            } catch (err) {
+                console.error("Bot dispatch failed:", err);
+            }
+        }
+
+        async function sendInAppNotification(userId, title, message) {
+            try {
+                await addDoc(collection(dbUser, "users", String(userId), "notifications"), {
+                    title: title,
+                    message: message,
+                    time: serverTimestamp()
+                });
+            } catch(e) {
+                console.warn("In-app notif failed:", e);
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('admin-login-btn').addEventListener('click', handleAdminLogin);
+            document.getElementById('admin-logout-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('user-search').addEventListener('input', (e) => loadUsers(e.target.value));
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.page); });
+            });
+
+            document.getElementById('send-broadcast-btn').addEventListener('click', handleBroadcastNotification);
+            document.getElementById('send-direct-btn').addEventListener('click', handleDirectNotification);
+
+            // Save Buttons
+            document.getElementById('save-products-btn').addEventListener('click', saveProductsConfig);
+            document.getElementById('save-categories-btn').addEventListener('click', saveCategoriesConfig);
+            document.getElementById('save-payments-btn').addEventListener('click', savePaymentsConfig);
+            document.getElementById('save-rules-btn').addEventListener('click', saveOrderRulesConfig);
+            document.getElementById('save-support-btn').addEventListener('click', saveBotAndSupportConfig);
+            document.getElementById('save-tasks-btn').addEventListener('click', saveDynamicTasksConfig);
+            document.getElementById('save-work-settings-btn').addEventListener('click', saveWorkJobsConfig);
+            document.getElementById('save-sell-services-btn').addEventListener('click', saveSellServicesConfig);
+
+            document.getElementById('add-mail-type-btn').addEventListener('click', () => addMailTypeToUI());
+            document.getElementById('add-payment-method-btn').addEventListener('click', () => addPaymentMethodToUI());
+            document.getElementById('add-category-btn').addEventListener('click', () => addCategoryToUI());
+            document.getElementById('add-task-btn').addEventListener('click', () => addTaskToUI());
+            document.getElementById('add-job-btn').addEventListener('click', () => addJobToUI());
+            document.getElementById('add-sell-service-btn').addEventListener('click', () => addSellServiceToUI());
+
+            document.getElementById('add-mails-btn').addEventListener('click', handleAddMails);
+            document.getElementById('balance-modal-cancel').addEventListener('click', () => document.getElementById('balance-modal').classList.add('hidden'));
+            document.getElementById('balance-form').addEventListener('submit', handleBalanceAndActivationUpdate);
+            document.getElementById('mail-type-select-manage').addEventListener('change', (e) => fetchAndDisplayMails(e.target.value));
+            document.getElementById('alert-ok-btn').onclick = () => document.getElementById('custom-alert').classList.add('hidden');
+        }
+
+        async function handleAdminLogin() {
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            if(!email || !password) return showAlert('Please enter email and password.');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) { showAlert("Login failed: " + error.message); }
+        }
+
+        function startLiveCounters() {
+            onSnapshot(query(collection(dbUser, "withdrawals"), where("status", "==", "pending")), (snap) => {
+                const badge = document.getElementById('nav-pending-withdrawals');
+                if (snap.size > 0) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+                const dashEl = document.getElementById('pending-withdrawals-count');
+                if (dashEl) dashEl.textContent = snap.size;
+            });
+
+            onSnapshot(query(collection(dbUser, "deposits"), where("status", "==", "pending")), (snap) => {
+                const badge = document.getElementById('nav-pending-deposits');
+                if (snap.size > 0) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+                const dashEl = document.getElementById('pending-deposits');
+                if (dashEl) dashEl.textContent = snap.size;
+            });
+
+            onSnapshot(query(collection(dbShop, "manual_orders"), where("status", "==", "pending")), (snap) => {
+                const badge = document.getElementById('nav-pending-manual');
+                if (snap.size > 0) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+            });
+
+            onSnapshot(query(collection(dbShop, "replace_requests"), where("status", "==", "pending")), (snap) => {
+                const badge = document.getElementById('nav-pending-replaces');
+                if (snap.size > 0) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+            });
+
+            onSnapshot(query(collection(dbWork, "master_training_applications"), where("status", "==", "pending")), (snap) => {
+                const badge = document.getElementById('nav-pending-master-apps');
+                if (snap.size > 0) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+                const dashEl = document.getElementById('pending-master-count');
+                if (dashEl) dashEl.textContent = snap.size;
+            });
+
+            onSnapshot(query(collection(dbWork, "work_submissions"), where("status", "==", "pending")), (snap) => {
+                const badge = document.getElementById('nav-pending-work');
+                if (snap.size > 0) { badge.textContent = snap.size; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+                const dashEl = document.getElementById('pending-work-count');
+                if (dashEl) dashEl.textContent = snap.size;
+            });
+        }
+
+        // --- DASHBOARD ---
+        async function loadDashboardData() {
+            const usersCountSnap = await getCountFromServer(collection(dbUser, "users"));
+            document.getElementById('total-users').textContent = usersCountSnap.data().count;
+
+            const approvedDepositsSnap = await getDocs(query(collection(dbUser, "deposits"), where("status", "==", "approved")));
+            const totalDepositAmount = approvedDepositsSnap.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0);
+            document.getElementById('total-deposits-amount').textContent = `৳${totalDepositAmount.toLocaleString()}`;
+
+            const approvedWithdrawSnap = await getDocs(query(collection(dbUser, "withdrawals"), where("status", "==", "approved")));
+            const totalWithdrawAmount = approvedWithdrawSnap.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0);
+            document.getElementById('total-withdrawals-amount').textContent = `৳${totalWithdrawAmount.toLocaleString()}`;
+
+            loadStockOverview();
+            loadDashboardChart();
+        }
+
+        async function loadStockOverview() {
+            const container = document.getElementById('stock-overview-container');
+            container.innerHTML = `<p class="text-sm text-gray-500">Checking stock levels...</p>`;
+            await fetchAppConfig();
+            if (!appConfig.mails || appConfig.mails.length === 0) {
+                container.innerHTML = `<p class="text-sm text-gray-500">No products configured.</p>`;
+                return;
+            }
+            const stockPromises = appConfig.mails.map(async (mail) => {
+                try {
+                    const snapshot = await getCountFromServer(query(collection(dbShop, mail.stockKey), where("isSold", "==", false)));
+                    return { name: mail.type, count: snapshot.data().count, isPopular: mail.isPopular };
+                } catch (e) {
+                    return { name: mail.type, count: 0, isPopular: false };
+                }
+            });
+            const stockCounts = await Promise.all(stockPromises);
+            container.innerHTML = stockCounts.map(stock => `
+                <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                    <span class="font-semibold text-gray-700 text-sm flex items-center gap-1.5">
+                        ${stock.name} ${stock.isPopular ? '<span class="text-[10px] bg-orange-100 text-orange-700 font-bold px-1.5 py-0.2 rounded-full">🔥 Popular</span>' : ''}
+                    </span>
+                    <span class="font-bold text-sm ${stock.count > 5 ? 'text-green-600' : 'text-red-500'}">${stock.count} in stock</span>
+                </div>
+            `).join('');
+        }
+
+        async function loadDashboardChart() {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const q = query(collection(dbUser, "users"), where("createdAt", ">=", sevenDaysAgo));
+            const snapshot = await getDocs(q);
+            const dailyCounts = {};
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                dailyCounts[d.toISOString().split('T')[0]] = 0;
+            }
+            snapshot.forEach(doc => {
+                const createdAt = doc.data().createdAt;
+                if (createdAt && createdAt.toDate) {
+                    const regDate = createdAt.toDate().toISOString().split('T')[0];
+                    if (dailyCounts[regDate] !== undefined) dailyCounts[regDate]++;
+                }
+            });
+            const labels = Object.keys(dailyCounts);
+            const data = Object.values(dailyCounts);
+            const ctx = document.getElementById('user-chart')?.getContext('2d');
+            if (!ctx) return;
+            if(userChart) userChart.destroy();
+            userChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'New Users', data, borderColor: '#1d4ed8', backgroundColor: 'rgba(29, 78, 216, 0.08)', fill: true, tension: 0.3 }] }, options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+        }
+
+        // --- WITHDRAWALS ---
+        function loadWithdrawals() {
+            const tableBody = document.getElementById('withdrawals-table-body');
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-xs">Loading withdrawal requests...</td></tr>`;
+            const q = query(collection(dbUser, "withdrawals"), where("status", "==", "pending"), orderBy("requestedAt", "desc"));
+            
+            withdrawUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-semibold text-xs">কোনো পেন্ডিং উইথড্র রিকোয়েস্ট নেই।</td></tr>`;
+                    return;
+                }
+                tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                    const w = docSnap.data();
+                    const date = w.requestedAt?.toDate().toLocaleString('en-GB') || 'N/A';
+                    const fee = w.fee !== undefined ? parseFloat(w.fee) : 10;
+                    const totalDebit = w.totalDebit !== undefined ? parseFloat(w.totalDebit) : (parseFloat(w.amount || 0) + fee);
+                    const isBinance = w.method === 'Binance';
+
+                    return `<tr>
+                        <td>
+                            <p class="font-bold text-gray-800 text-xs">${w.userName || 'User'}</p>
+                            <p class="text-[11px] text-gray-500 font-mono">ID: ${w.userId}</p>
+                        </td>
+                        <td>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-black uppercase ${isBinance ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800'}">${w.method}</span>
+                            <p class="font-mono text-xs font-bold text-gray-800 mt-0.5 select-all">${w.accountNumber}</p>
+                            <p class="text-[10px] text-gray-500">নাম: ${w.accountName || 'N/A'}</p>
+                        </td>
+                        <td>
+                            <span class="font-black text-rose-600 text-sm font-mono">৳${parseFloat(w.amount || 0).toFixed(0)}</span>
+                            <p class="text-[10px] text-gray-400">ফি: ৳${fee} (মোট কর্তন ৳${totalDebit})</p>
+                        </td>
+                        <td class="text-xs text-gray-500">${date}</td>
+                        <td class="space-x-2 whitespace-nowrap">
+                            <button class="btn btn-success text-xs" onclick="window.handleWithdrawAction('${docSnap.id}', '${w.userId}', ${w.amount}, ${totalDebit}, 'approved', '${w.method}')">Approve Paid</button>
+                            <button class="btn btn-danger text-xs" onclick="window.handleWithdrawAction('${docSnap.id}', '${w.userId}', ${w.amount}, ${totalDebit}, 'rejected', '${w.method}')">Reject & Refund</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                lucide.createIcons();
+            });
+        }
+
+        window.handleWithdrawAction = (withdrawId, userId, amount, totalRefundDebit, newStatus, method = 'E-Wallet') => {
+            const isApproved = newStatus === 'approved';
+            const actionPrompt = isApproved 
+                ? `আপনি কি নিশ্চিত যে এই ৳${amount} টাকা সফলভাবে প্রদান করেছেন এবং APPROVE করবেন? (ইউজারের টেলিগ্রামে মেসেজ যাবে)` 
+                : `উইথড্র বাতিল করলে ব্যবহারকারীর ওয়ালেটে পুরো ৳${totalRefundDebit} টাকা (১০ টাকা ফি সহ) রিফান্ড হয়ে যাবে। নিশ্চিত?`;
+
+            showConfirm(actionPrompt, async () => {
+                try {
+                    const withdrawRef = doc(dbUser, "withdrawals", withdrawId);
+                    const userRef = doc(dbUser, "users", String(userId));
+
+                    await runTransaction(dbUser, async (t) => {
+                        if (!isApproved) {
+                            t.update(userRef, { balance: increment(parseFloat(totalRefundDebit)) });
+                        }
+                        t.update(withdrawRef, { status: newStatus, processedAt: serverTimestamp() });
+                    });
+
+                    if (isApproved) {
+                        const template = appConfig.msgWithdrawSuccess || `✅ <b>আপনার ৳{amount} উইথড্রয়াল সফল হয়েছে!</b>\nপেমেন্ট মেথড: {method}\nটাকা আপনার অ্যাকাউন্টে পাঠিয়ে দেওয়া হয়েছে। ধন্যবাদ!`;
+                        const msg = template.replace('{amount}', amount).replace('{method}', method);
+                        await sendTelegramDirectMessage(userId, msg);
+                    } else {
+                        await sendInAppNotification(userId, "উইথড্র বাতিল ও রিফান্ড", `আপনার ৳${amount} উইথড্র অনুরোধ বাতিল করা হয়েছে এবং ফি সহ ৳${totalRefundDebit} ওয়ালেটে রিফান্ড করা হয়েছে।`);
+                    }
+
+                    showAlert(`Withdrawal has been ${newStatus}.`);
+                } catch(e) {
+                    showAlert("Action failed: " + e.message);
+                }
+            });
+        };
+
+        // --- DEPOSITS ---
+        function loadDeposits() {
+            const tableBody = document.getElementById('deposits-table-body');
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading deposits...</td></tr>`;
+            const q = query(collection(dbUser, "deposits"), where("status", "==", "pending"), orderBy("requestedAt", "desc"));
+            
+            depositUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending deposit requests.</td></tr>`;
+                    return;
+                }
+                tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                    const req = docSnap.data();
+                    const date = req.requestedAt?.toDate().toLocaleString('en-GB') || 'N/A';
+                    return `<tr>
+                        <td><p class="font-bold text-gray-800 text-xs">${req.userName || 'User'}</p><p class="text-[11px] text-gray-500 font-mono">${req.userId}</p></td>
+                        <td class="font-bold text-blue-600 text-xs">৳${req.amount}</td>
+                        <td><span class="bg-blue-100 text-blue-800 text-[10px] px-2.5 py-0.5 rounded-full font-bold">${req.method}</span></td>
+                        <td class="font-mono text-xs text-gray-700 bg-gray-100 p-1.5 rounded-lg font-bold">${req.transactionId}</td>
+                        <td class="text-xs text-gray-500">${date}</td>
+                        <td class="space-x-2 whitespace-nowrap">
+                            <button class="btn btn-success text-xs" onclick="window.handleDepositAction('${docSnap.id}', '${req.userId}', ${req.amount}, 'approved', '${req.transactionId}')">Approve</button>
+                            <button class="btn btn-danger text-xs" onclick="window.handleDepositAction('${docSnap.id}', '${req.userId}', ${req.amount}, 'rejected', '${req.transactionId}')">Reject</button>
+                        </td></tr>`;
+                }).join('');
+            });
+        }
+
+        window.handleDepositAction = (depositId, userId, amount, newStatus, trxId) => {
+            showConfirm(`Are you sure you want to ${newStatus.toUpperCase()} this ৳${amount} deposit (Trx: ${trxId})?`, async () => {
+                try {
+                    const depositRef = doc(dbUser, "deposits", depositId);
+                    const userRef = doc(dbUser, "users", String(userId));
+
+                    await runTransaction(dbUser, async (transaction) => {
+                        if (newStatus === 'approved') {
+                            transaction.update(userRef, { balance: increment(amount) });
+                        }
+                        transaction.update(depositRef, { status: newStatus, processedAt: serverTimestamp() });
+                    });
+
+                    await sendInAppNotification(
+                        userId, 
+                        newStatus === 'approved' ? "ডিপোজিট অনুমোদিত" : "ডিপোজিট বাতিল", 
+                        newStatus === 'approved' ? `আপনার ৳${amount} ডিপোজিট সফলভাবে অ্যাকাউন্টে যুক্ত হয়েছে (TXID: ${trxId})।` : `আপনার ৳${amount} ডিপোজিট অনুরোধটি বাতিল করা হয়েছে।`
+                    );
+
+                    showAlert(`Deposit has been ${newStatus}.`);
+                } catch(e) {
+                    showAlert("Failed: " + e.message);
+                }
+            });
+        };
+
+        // --- MANUAL ORDERS ---
+        function loadManualOrders() {
+            const tableBody = document.getElementById('manual-orders-table-body');
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-xs">Loading orders...</td></tr>`;
+            const q = query(collection(dbShop, "manual_orders"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
+
+            manualUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending manual orders.</td></tr>`;
+                    return;
+                }
+                tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                    const po = docSnap.data();
+                    const poId = docSnap.id;
+                    const expiryMillis = po.expiresAt ? po.expiresAt.toDate().getTime() : 0;
+
+                    return `<tr>
+                        <td>
+                            <p class="font-bold text-gray-800 text-xs">${po.userName || 'User'}</p>
+                            <p class="text-[11px] text-gray-500 font-mono">TG: ${po.userId}</p>
+                        </td>
+                        <td>
+                            <p class="font-bold text-gray-800 text-xs">${po.mailType} ${po.quantity ? `(${po.quantity} pcs)` : ''}</p>
+                            <p class="text-xs font-bold text-blue-600">৳${parseFloat(po.cost || 0).toFixed(2)}</p>
+                        </td>
+                        <td>
+                            <span class="live-admin-countdown bg-orange-100 text-orange-800 font-mono text-xs px-2.5 py-1 rounded-full font-bold" data-expiry="${expiryMillis}">Calculating...</span>
+                        </td>
+                        <td class="space-y-1 max-w-xs">
+                            <input id="admin-manual-acc-${poId}" type="text" placeholder="Email / IP / Data" class="w-full p-1.5 border rounded-lg text-xs">
+                            <input id="admin-manual-key-${poId}" type="text" placeholder="Password / Key (Optional)" class="w-full p-1.5 border rounded-lg text-xs">
+                        </td>
+                        <td class="space-x-1.5 whitespace-nowrap">
+                            <button class="btn btn-success text-xs" onclick="window.deliverManualOrder('${poId}', '${po.userId}', ${po.cost}, '${po.mailType}')"><i data-lucide="send" class="w-3.5 h-3.5"></i> Deliver</button>
+                            <button class="btn btn-danger text-xs" onclick="window.cancelManualOrder('${poId}', '${po.userId}', ${po.cost}, '${po.mailType}')">Reject & Refund</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                lucide.createIcons();
+            });
+        }
+
+        function startCountdownTimerRoutine() {
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+            liveTimerInterval = setInterval(() => {
+                const timers = document.querySelectorAll('.live-admin-countdown');
+                const now = new Date().getTime();
+
+                timers.forEach(t => {
+                    const expiry = parseInt(t.dataset.expiry);
+                    const diff = expiry - now;
+                    if (diff <= 0) {
+                        t.textContent = '00:00 (Expired)';
+                        t.className = 'live-admin-countdown bg-red-100 text-red-700 font-mono text-xs px-2.5 py-1 rounded-full font-bold';
+                    } else {
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                        t.textContent = `${m}m ${s < 10 ? '0' : ''}${s}s`;
+                    }
+                });
+            }, 1000);
+        }
+
+        window.deliverManualOrder = async (orderId, userId, cost, mailType) => {
+            const accData = document.getElementById(`admin-manual-acc-${orderId}`)?.value.trim();
+            const accKey = document.getElementById(`admin-manual-key-${orderId}`)?.value.trim() || '';
+
+            if (!accData) return showAlert("দয়া করে অ্যাকাউন্টের ডাটা/ইমেইল লিখুন।");
+
+            showConfirm(`Are you sure you want to DELIVER this order to User TG ID: ${userId}?`, async () => {
+                try {
+                    const moRef = doc(dbShop, "manual_orders", orderId);
+                    await updateDoc(moRef, { status: "approved", deliveredData: accData, deliveredPass: accKey, fulfilledAt: serverTimestamp() });
+
+                    const saleId = Date.now();
+                    await addDoc(collection(dbShop, "purchases"), {
+                        saleId: saleId,
+                        userId: String(userId),
+                        mailType: mailType,
+                        category: "manual_order",
+                        cost: parseFloat(cost),
+                        purchasedAt: serverTimestamp(),
+                        mail: accData,
+                        password: accKey || null
+                    });
+
+                    await sendInAppNotification(userId, "প্রি-অর্ডার ডেলিভারি", `আপনার ${mailType} প্রি-অর্ডারটি সফলভাবে ডেলিভারি হয়েছে! অর্ডার হিস্ট্রি পেজ থেকে সংগ্রহ করুন।`);
+                    showAlert("অর্ডারটি সফলভাবে ডেলিভারি করা হয়েছে!");
+                } catch(e) {
+                    showAlert("Delivery failed: " + e.message);
+                }
+            });
+        };
+
+        window.cancelManualOrder = async (orderId, userId, cost, mailType) => {
+            showConfirm(`Are you sure you want to CANCEL and REFUND ৳${cost} to user?`, async () => {
+                try {
+                    const moRef = doc(dbShop, "manual_orders", orderId);
+                    const userRef = doc(dbUser, "users", String(userId));
+                    
+                    await updateDoc(moRef, { status: "cancelled_refunded", refundedAt: serverTimestamp() });
+                    await updateDoc(userRef, { balance: increment(parseFloat(cost)) });
+
+                    await sendInAppNotification(userId, "প্রি-অর্ডার রিফান্ড", `${mailType} প্রি-অর্ডারটি বাতিল করে ৳${cost} ওয়ালেটে রিফান্ড করা হয়েছে।`);
+                    showAlert("অর্ডার বাতিল ও রিফান্ড সম্পন্ন হয়েছে!");
+                } catch(e) {
+                    showAlert(e.message);
+                }
+            });
+        };
+
+        // --- MASTER WORK APPLICATIONS ---
+        function loadMasterApplications() {
+            const tableBody = document.getElementById('master-apps-table-body');
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading applications...</td></tr>`;
+            const q = query(collection(dbWork, "master_training_applications"), where("status", "==", "pending"), orderBy("submittedAt", "desc"));
+
+            masterAppUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">কোনো পেন্ডিং মাস্টার ট্রেনিং আবেদন নেই।</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                    const app = docSnap.data();
+                    const date = app.submittedAt?.toDate().toLocaleString('en-GB') || 'Just now';
+
+                    return `<tr>
+                        <td>
+                            <p class="font-bold text-gray-800 text-xs">${app.telegramName || 'User'}</p>
+                            <p class="text-[11px] font-mono text-gray-500">ID: ${app.userId}</p>
+                            <p class="text-[10px] text-blue-600 font-semibold">${app.telegramUsername ? '@' + app.telegramUsername : ''}</p>
+                        </td>
+                        <td>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">${app.contactPlatform}</span>
+                            <p class="font-mono text-xs font-bold text-gray-800 mt-1 select-all">${app.contactNumber}</p>
+                        </td>
+                        <td class="text-xs">
+                            <p class="font-semibold text-gray-700">${app.preferredTime}</p>
+                            <p class="text-[10px] text-gray-400">অভিজ্ঞতা: ${app.experience}</p>
+                        </td>
+                        <td class="text-xs text-gray-600 max-w-xs">${app.expectations || 'N/A'}</td>
+                        <td class="text-xs text-gray-500">${date}</td>
+                        <td class="space-x-1.5 whitespace-nowrap">
+                            <button class="btn btn-success text-xs" onclick="window.handleMasterAppStatus('${docSnap.id}', '${app.userId}', 'approved')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve Training</button>
+                            <button class="btn btn-danger text-xs" onclick="window.handleMasterAppStatus('${docSnap.id}', '${app.userId}', 'rejected')">Reject</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                lucide.createIcons();
+            });
+        }
+
+        window.handleMasterAppStatus = (appId, userId, newStatus) => {
+            const isApproved = newStatus === 'approved';
+            showConfirm(`Are you sure you want to ${newStatus.toUpperCase()} this Master Training Application?`, async () => {
+                try {
+                    const updatePayload = {
+                        status: newStatus,
+                        reviewedAt: serverTimestamp()
+                    };
+
+                    if (!isApproved) {
+                        updatePayload.rejectedAt = serverTimestamp();
+                    }
+
+                    await updateDoc(doc(dbWork, "master_training_applications", appId), updatePayload);
+
+                    if (isApproved) {
+                        const approvedTemplate = appConfig.msgMasterApproved || `🎉 <b>আপনার Master Work ট্রেনিং আবেদন অনুমোদিত হয়েছে!</b>\n\nআপনি এখন মিনি অ্যাপ থেকে সরাসরি Master Work টাস্ক সাবমিট করতে পারবেন। আমাদের ট্রেইনার আপনার সাথে খুব শীঘ্রই যোগাযোগ করবেন।`;
+                        await sendTelegramDirectMessage(userId, approvedTemplate);
+                    } else {
+                        const rejectedTemplate = appConfig.msgMasterRejected || `❌ <b>আপনার Master Work ট্রেনিং আবেদনটি বাতিল করা হয়েছে!</b>\n\nআপনি আগামী ২৪ ঘণ্টা পর অ্যাপ থেকে পুনরায় সঠিক তথ্য দিয়ে আবেদন করতে পারবেন।`;
+                        await sendTelegramDirectMessage(userId, rejectedTemplate);
+                    }
+
+                    showAlert(`Application has been marked as ${newStatus}.`);
+                } catch(e) {
+                    showAlert(e.message);
+                }
+            });
+        };
+
+        // --- WORK SUBMISSIONS ---
+        function loadWorkSubmissions() {
+            const tableBody = document.getElementById('work-submissions-table-body');
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading work submissions...</td></tr>`;
+            const q = query(collection(dbWork, "work_submissions"), where("status", "==", "pending"), orderBy("submittedAt", "desc"));
+
+            workUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending work proofs to review.</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                    const sub = docSnap.data();
+                    const subId = docSnap.id;
+                    const date = sub.submittedAt?.toDate().toLocaleString('en-GB') || 'Just now';
+                    const isMaster = !!sub.isMasterTask;
+
+                    return `<tr>
+                        <td>
+                            <p class="font-bold text-gray-800 text-xs">${sub.userName || 'User'}</p>
+                            <p class="text-[11px] font-mono text-gray-500">TG: ${sub.userId}</p>
+                        </td>
+                        <td>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black ${isMaster ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800'}">
+                                ${isMaster ? 'MASTER TASK' : 'VIP 0 SELL'}
+                            </span>
+                            <p class="font-bold text-xs text-gray-800 mt-1">${sub.jobTitle}</p>
+                        </td>
+                        <td class="font-black text-emerald-600 text-xs">৳${parseFloat(sub.reward || 0).toFixed(2)}</td>
+                        <td class="max-w-xs">
+                            <div class="bg-gray-50 p-2 rounded-lg border font-mono text-[11px] text-gray-700 break-all select-all">
+                                ${sub.proof}
+                            </div>
+                        </td>
+                        <td class="text-xs text-gray-500">${date}</td>
+                        <td class="space-x-1.5 whitespace-nowrap">
+                            <button class="btn btn-success text-xs" onclick="window.approveWorkSubmission('${subId}', '${sub.userId}', ${sub.reward}, '${sub.jobTitle}')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve & Pay</button>
+                            <button class="btn btn-danger text-xs" onclick="window.rejectWorkSubmission('${subId}', '${sub.userId}', '${sub.jobTitle}')">Reject</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                lucide.createIcons();
+            });
+        }
+
+        window.approveWorkSubmission = (subId, userId, reward, jobTitle) => {
+            showConfirm(`Are you sure you want to APPROVE this work and add ৳${reward} to User TG ID: ${userId}?`, async () => {
+                try {
+                    const subRef = doc(dbWork, "work_submissions", subId);
+                    const userRef = doc(dbUser, "users", String(userId));
+
+                    await updateDoc(subRef, { status: "approved", approvedAt: serverTimestamp() });
+                    await updateDoc(userRef, { balance: increment(parseFloat(reward)) });
+
+                    await sendInAppNotification(userId, "কাজের রিওয়ার্ড যুক্ত হয়েছে", `${jobTitle} কাজের জন্য ৳${reward} আপনার ওয়ালেটে সফলভাবে যুক্ত হয়েছে।`);
+                    showAlert("কাজ সফলভাবে অ্যাপ্রুভ এবং ইউজারের ব্যালেন্স যোগ হয়েছে!");
+                } catch(e) {
+                    showAlert("Approval failed: " + e.message);
+                }
+            });
+        };
+
+        window.rejectWorkSubmission = (subId, userId, jobTitle) => {
+            showConfirm(`Are you sure you want to REJECT this work submission?`, async () => {
+                try {
+                    const subRef = doc(dbWork, "work_submissions", subId);
+                    await updateDoc(subRef, { status: "rejected", rejectedAt: serverTimestamp() });
+
+                    await sendInAppNotification(userId, "কাজের সাবমিশন বাতিল", `${jobTitle} কাজের সাবমিশনটি ভুল তথ্যের কারণে বাতিল করা হয়েছে।`);
+                    showAlert("কাজের সাবমিশন বাতিল করা হয়েছে।");
+                } catch(e) {
+                    showAlert(e.message);
+                }
+            });
+        };
+
+        // --- REPLACE REQUESTS ---
+        function loadReplaceRequests() {
+            const tableBody = document.getElementById('replace-table-body');
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading requests...</td></tr>`;
+            const q = query(collection(dbShop, "replace_requests"), where("status", "==", "pending"), orderBy("requestedAt", "desc"));
+            
+            replaceUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending replace/refund requests.</td></tr>`;
+                    return;
+                }
+                tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                    const req = docSnap.data();
+                    const date = req.requestedAt?.toDate().toLocaleString('en-GB') || 'N/A';
+                    return `<tr>
+                        <td><p class="font-bold text-gray-800 text-xs">${req.userName || 'User'}</p><p class="text-[11px] font-mono text-gray-500">${req.userId}</p></td>
+                        <td><p class="font-semibold text-xs">${req.mailType}</p><p class="text-[10px] font-mono text-blue-600">ID: #${req.saleId || 'N/A'}</p></td>
+                        <td class="font-bold text-red-600 text-xs">৳${parseFloat(req.cost || 0).toFixed(2)}</td>
+                        <td class="text-xs text-gray-700 max-w-xs">${req.reason}</td>
+                        <td class="text-xs">${req.proof ? `<a href="${req.proof}" target="_blank" class="text-blue-600 font-bold underline">View Proof</a>` : 'None'}</td>
+                        <td class="text-xs text-gray-500">${date}</td>
+                        <td class="space-x-2 whitespace-nowrap">
+                            <button class="btn btn-success text-xs" onclick="window.handleReplaceAction('${docSnap.id}', '${req.userId}', ${req.cost}, '${req.purchaseId}', '${req.saleId}', '${req.mailType}', 'approved')">Approve & Refund</button>
+                            <button class="btn btn-danger text-xs" onclick="window.handleReplaceAction('${docSnap.id}', '${req.userId}', 0, '${req.purchaseId}', '${req.saleId}', '${req.mailType}', 'rejected')">Reject</button>
+                        </td></tr>`;
+                }).join('');
+            });
+        }
+
+        window.handleReplaceAction = (requestId, userId, cost, purchaseId, saleId, mailType, newStatus) => {
+            const actionText = newStatus === 'approved' ? `APPROVE and REFUND ৳${cost}` : `REJECT`;
+            showConfirm(`Are you sure you want to ${actionText} for ${mailType}?`, async () => {
+                try {
+                    const requestRef = doc(dbShop, "replace_requests", requestId);
+                    const userRef = doc(dbUser, "users", String(userId));
+                    const purchaseRef = purchaseId ? doc(dbShop, "purchases", purchaseId) : null;
+
+                    if (newStatus === 'approved') {
+                        await updateDoc(userRef, { balance: increment(cost) });
+                        if (purchaseRef) await updateDoc(purchaseRef, { isRefunded: true });
+                    }
+                    await updateDoc(requestRef, { status: newStatus, resolvedAt: serverTimestamp() });
+
+                    await sendInAppNotification(userId, "রিপ্লেসমেন্ট রিকোয়েস্ট আপডেট", `${mailType} এর জন্য রিপ্লেসমেন্ট রিকোয়েস্টটি ${newStatus === 'approved' ? 'গৃহীত হয়েছে ও টাকা রিফান্ড করা হয়েছে।' : 'বাতিল করা হয়েছে।'}`);
+
+                    showAlert(`Request has been ${newStatus}.`);
+                } catch(e) {
+                    showAlert("Action failed: " + e.message);
+                }
+            });
+        };
+
+        // --- USERS MANAGEMENT ---
+        async function loadUsers(searchTerm = '') {
+            const tableBody = document.getElementById('users-table-body');
+            tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-xs">Loading users...</td></tr>`;
+            const snapshot = await getDocs(query(collection(dbUser, "users"), orderBy("createdAt", "desc"), limit(150)));
+            let users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                users = users.filter(user => 
+                    (user.name || '').toLowerCase().includes(term) || 
+                    (user.tgChatId || '').includes(term) ||
+                    (user.username || '').toLowerCase().includes(term)
+                );
+            }
+
+            if (users.length === 0) { tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-gray-500 font-semibold text-xs">No users found.</td></tr>`; return; }
+            tableBody.innerHTML = users.map(user => {
+                const isBlocked = user.isBlocked || false;
+                const isActive = user.isAccountActive === true;
+                const isMaster = user.unlockedMasterWork === true;
+                const userDataString = JSON.stringify({ 
+                    id: user.id, 
+                    name: user.name || 'User', 
+                    balance: user.balance || 0, 
+                    isAccountActive: isActive,
+                    unlockedMasterWork: isMaster
+                }).replace(/"/g, "'");
+                
+                return `<tr>
+                    <td><div class="flex items-center gap-2"><img src="${user.photo_url || 'https://via.placeholder.com/40'}" class="w-7 h-7 rounded-full object-cover"><span class="text-xs font-bold">${user.name || 'N/A'}</span></div></td>
+                    <td class="font-mono text-xs">${user.tgChatId || user.id}</td>
+                    <td class="text-xs text-blue-600 font-semibold">${user.username ? '@' + user.username : 'None'}</td>
+                    <td>
+                        <span class="px-2 py-0.5 text-[10px] font-black rounded-md ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+                            ${isActive ? 'ACTIVE' : 'INACTIVE'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="px-2 py-0.5 text-[10px] font-black rounded-md ${isMaster ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-gray-100 text-gray-600'}">
+                            ${isMaster ? 'MASTER' : 'FREE'}
+                        </span>
+                    </td>
+                    <td class="font-bold text-gray-800 text-xs font-mono">৳${(user.balance || 0).toFixed(2)}</td>
+                    <td><span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">${isBlocked ? 'Blocked' : 'Normal'}</span></td>
+                    <td class="space-x-1.5 whitespace-nowrap">
+                        <button class="btn text-xs ${isBlocked ? 'btn-success' : 'btn-danger'}" onclick="window.toggleBlockUser('${user.id}', ${isBlocked})">${isBlocked ? 'Unblock' : 'Block'}</button>
+                        <button class="btn text-xs btn-primary" onclick="window.openBalanceModal(${userDataString})">Edit</button>
+                    </td></tr>`;
+            }).join('');
+        }
+
+        window.toggleBlockUser = (userId, isBlocked) => {
+            const action = isBlocked ? 'unblock' : 'block';
+            showConfirm(`Are you sure you want to ${action} this user?`, async () => {
+                await updateDoc(doc(dbUser, "users", userId), { isBlocked: !isBlocked });
+                showAlert(`User successfully ${action}ed.`);
+                loadUsers(document.getElementById('user-search').value);
+            });
+        };
+
+        window.openBalanceModal = (userData) => {
+            document.getElementById('balance-user-id').value = userData.id;
+            document.getElementById('balance-modal-title').textContent = `Manage: ${userData.name}`;
+            document.getElementById('current-balance-display').textContent = `৳${(userData.balance || 0).toFixed(2)}`;
+            document.getElementById('current-active-display').textContent = userData.isAccountActive ? 'Active' : 'Inactive';
+            document.getElementById('current-active-display').className = userData.isAccountActive ? 'text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md' : 'text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-md';
+            
+            document.getElementById('user-active-select').value = String(userData.isAccountActive);
+            document.getElementById('user-master-select').value = String(userData.unlockedMasterWork);
+            document.getElementById('balance-amount').value = "0";
+            document.getElementById('balance-modal').classList.remove('hidden');
+        };
+
+        async function handleBalanceAndActivationUpdate(e) {
+            e.preventDefault();
+            const userId = document.getElementById('balance-user-id').value;
+            const action = document.getElementById('balance-action').value;
+            const amount = parseFloat(document.getElementById('balance-amount').value) || 0;
+            const targetActive = document.getElementById('user-active-select').value === "true";
+            const targetMaster = document.getElementById('user-master-select').value === "true";
+            
+            const userRef = doc(dbUser, "users", userId);
+            try {
+                await runTransaction(dbUser, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw new Error("User not found.");
+                    const currentBalance = userDoc.data().balance || 0;
+                    
+                    let newBalance = currentBalance;
+                    if (amount > 0) {
+                        newBalance = (action === 'add') ? currentBalance + amount : (action === 'deduct') ? currentBalance - amount : amount;
+                        if (newBalance < 0) newBalance = 0;
+                    }
+
+                    transaction.update(userRef, { 
+                        balance: newBalance, 
+                        isAccountActive: targetActive,
+                        unlockedMasterWork: targetMaster
+                    });
+                });
+                showAlert("User data updated successfully.");
+                document.getElementById('balance-modal').classList.add('hidden');
+                loadUsers(document.getElementById('user-search').value);
+            } catch (error) { showAlert("Update failed: " + error.message); }
+        }
+
+        // --- PURCHASES HISTORY ---
+        async function loadMailPurchases() {
+            const tableBody = document.getElementById('purchases-table-body');
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading purchases...</td></tr>`;
+            const q = query(collection(dbShop, "purchases"), orderBy("purchasedAt", "desc"), limit(100));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) { tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500 font-semibold text-xs">No purchases found.</td></tr>`; return; }
+
+            tableBody.innerHTML = snapshot.docs.map(docSnap => {
+                const p = docSnap.data();
+                const credentials = [p.mail, p.password].filter(Boolean).join(' | ');
+                const date = p.purchasedAt?.toDate().toLocaleString('en-GB') || 'N/A';
+                return `<tr>
+                    <td class="font-mono font-bold text-xs">#${p.saleId || 'N/A'}</td>
+                    <td class="text-xs text-gray-500">${date}</td>
+                    <td class="font-mono text-xs">${p.userId}</td>
+                    <td class="font-bold text-xs text-gray-800">${p.mailType}</td>
+                    <td class="text-xs font-mono max-w-sm overflow-hidden text-ellipsis select-all">${credentials}</td>
+                    <td class="font-bold text-blue-600 text-xs">৳${parseFloat(p.cost || 0).toFixed(2)}</td>
+                    <td>${p.isRefunded ? '<span class="text-xs text-red-600 font-bold">YES</span>' : '<span class="text-xs text-green-600 font-bold">NO</span>'}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ================= NEW: ACCOUNT SELL SERVICES CONFIG (dbWork) =================
+        async function loadSellServicesConfig() {
+            const container = document.getElementById('sell-services-container');
+            container.innerHTML = `<p class="text-xs text-gray-500">Loading sell services...</p>`;
+
+            try {
+                let servicesList = [];
+                const snap = await getDocs(collection(dbWork, "sell_services"));
+                if (!snap.empty) {
+                    servicesList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } else {
+                    await fetchAppConfig();
+                    servicesList = appConfig.sellServices || [
+                        {
+                            id: "gmail",
+                            name: "Gmail Sell",
+                            category: "Gmail",
+                            icon: "mail",
+                            rate: 25.00,
+                            rateDisplay: "৳২০.০০ - ৳৫০.০০",
+                            isActive: true,
+                            placeholder: "Email | Password | Recovery Mail (যদি থাকে)",
+                            formatHint: "Email | Password"
+                        },
+                        {
+                            id: "facebook",
+                            name: "Facebook Sell",
+                            category: "Facebook",
+                            icon: "facebook",
+                            rate: 25.00,
+                            rateDisplay: "৳২৫.০০ / আইডি",
+                            isActive: true,
+                            placeholder: "UID / Profile Link | Password | 2FA Code (যদি থাকে)",
+                            formatHint: "UID/Number | Password"
+                        }
+                    ];
+                }
+
+                container.innerHTML = '';
+                servicesList.forEach(s => addSellServiceToUI(s));
+                lucide.createIcons();
+            } catch(e) {
+                container.innerHTML = `<p class="text-xs text-red-500">Error: ${e.message}</p>`;
+            }
+        }
+
+        function addSellServiceToUI(srv = {}) {
+            const container = document.getElementById('sell-services-container');
+            const card = document.createElement('div');
+            card.className = 'p-5 border rounded-2xl bg-white sell-service-card space-y-3 relative shadow-sm';
+            const isEnabled = srv.isActive !== false;
+
+            card.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Service ID (Unique)</label>
+                        <input type="text" placeholder="e.g. gmail, facebook" class="p-2 border rounded-lg w-full text-xs font-mono font-bold" data-srv="id" value="${srv.id || ''}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Service Name</label>
+                        <input type="text" placeholder="e.g. Gmail Sell" class="p-2 border rounded-lg w-full text-xs font-bold text-gray-800" data-srv="name" value="${srv.name || ''}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Estimated Rate (BDT - ইউজারের রিওয়ার্ড)</label>
+                        <input type="number" step="0.5" placeholder="25.00" class="p-2 border rounded-lg w-full text-xs font-bold text-emerald-600" data-srv="rate" value="${srv.rate || 25.00}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Display Label (কার্ডে যা দেখাবে)</label>
+                        <input type="text" placeholder="৳২০.০০ - ৳৫০.০০" class="p-2 border rounded-lg w-full text-xs font-bold text-blue-600" data-srv="rateDisplay" value="${srv.rateDisplay || ''}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Category</label>
+                        <input type="text" placeholder="Gmail" class="p-2 border rounded-lg w-full text-xs" data-srv="category" value="${srv.category || ''}">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Lucide Icon</label>
+                        <input type="text" placeholder="mail, facebook" class="p-2 border rounded-lg w-full text-xs font-mono" data-srv="icon" value="${srv.icon || 'shield-check'}">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Format Sample Hint</label>
+                        <input type="text" placeholder="Email | Password" class="p-2 border rounded-lg w-full text-xs" data-srv="formatHint" value="${srv.formatHint || 'Email | Password'}">
+                    </div>
+
+                    <div class="md:col-span-4">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Textarea Placeholder</label>
+                        <input type="text" placeholder="Email | Password | Recovery Mail" class="p-2 border rounded-lg w-full text-xs" data-srv="placeholder" value="${srv.placeholder || ''}">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 text-emerald-600 rounded" data-srv="isActive" ${isEnabled ? 'checked' : ''}>
+                        <span class="text-xs font-bold text-gray-700">সার্ভিসটি অ্যাপে চালু রাখুন (Active in App)</span>
+                    </label>
+                    <button class="btn btn-danger text-xs py-1 px-3" onclick="this.closest('.sell-service-card').remove()">Remove Service</button>
+                </div>
+            `;
+            container.appendChild(card);
+            lucide.createIcons();
+        }
+
+        async function saveSellServicesConfig() {
+            const newServices = [];
+            document.querySelectorAll('.sell-service-card').forEach(card => {
+                const s = {};
+                card.querySelectorAll('[data-srv]').forEach(input => {
+                    const field = input.dataset.srv;
+                    if (input.type === 'checkbox') {
+                        s[field] = input.checked;
+                    } else if (field === 'rate') {
+                        s[field] = parseFloat(input.value) || 0;
+                    } else {
+                        s[field] = input.value.trim();
+                    }
+                });
+                if (s.id && s.name) newServices.push(s);
+            });
+
+            try {
+                const batch = writeBatch(dbWork);
+                const existingSnap = await getDocs(collection(dbWork, "sell_services"));
+                existingSnap.docs.forEach(d => batch.delete(d.ref));
+
+                newServices.forEach(s => {
+                    batch.set(doc(dbWork, "sell_services", s.id), s);
+                });
+
+                await batch.commit();
+
+                // Sync with user app config
+                await setDoc(doc(dbUser, "config", "main"), {
+                    sellServices: newServices
+                }, { merge: true });
+
+                showAlert("Account Sell Services সফলভাবে dbWork এ সংরক্ষিত হয়েছে!");
+            } catch(e) {
+                showAlert("সেভ করতে সমস্যা হয়েছে: " + e.message);
+            }
+        }
+
+        // ================= WORK JOBS MANAGEMENT =================
+        async function loadWorkJobsConfig() {
+            await fetchAppConfig();
+            document.getElementById('toggle-global-work').checked = appConfig.workSystemEnabled !== false;
+
+            const container = document.getElementById('jobs-container');
+            container.innerHTML = `<p class="text-xs text-gray-500">Loading work jobs...</p>`;
+
+            try {
+                let jobsList = [];
+                const jobsQuery = query(collection(dbWork, "available_jobs"));
+                const jobSnap = await getDocs(jobsQuery);
+
+                if (!jobSnap.empty) {
+                    jobsList = jobSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } else {
+                    jobsList = appConfig.availableJobs || [];
+                }
+
+                container.innerHTML = '';
+                jobsList.forEach(job => addJobToUI(job));
+                lucide.createIcons();
+            } catch(e) {
+                container.innerHTML = `<p class="text-xs text-red-500">Error: ${e.message}</p>`;
+            }
+        }
+
+        function addJobToUI(job = {}) {
+            const container = document.getElementById('jobs-container');
+            const card = document.createElement('div');
+            card.className = 'p-5 border rounded-2xl bg-white job-config-card space-y-3 relative shadow-sm';
+
+            const jobId = job.id || ('job_' + Date.now());
+            const isVip0 = job.type === 'vip0';
+            const isMaster = job.type === 'master';
+            const isActiveChecked = job.isActive !== false ? 'checked' : '';
+            const featuresStr = Array.isArray(job.features) ? job.features.join(', ') : '';
+
+            card.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Job ID</label>
+                        <input type="text" placeholder="job_id" class="p-2 border rounded-lg w-full text-xs font-mono" data-job="id" value="${jobId}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Job Engine Type</label>
+                        <select class="p-2 border rounded-lg w-full text-xs font-bold text-indigo-700 bg-indigo-50" data-job="type">
+                            <option value="vip0" ${isVip0 ? 'selected' : ''}>VIP 0 Account Sell</option>
+                            <option value="master" ${isMaster ? 'selected' : ''}>Master Live Work</option>
+                            <option value="custom" ${(!isVip0 && !isMaster) ? 'selected' : ''}>Custom Submission</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Category Badge</label>
+                        <input type="text" placeholder="Account Selling" class="p-2 border rounded-lg w-full text-xs font-bold" data-job="category" value="${job.category || 'Work'}">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Reward Text / Badge</label>
+                        <input type="text" placeholder="৳২০ - ৳৫০" class="p-2 border rounded-lg w-full text-xs font-bold text-emerald-600" data-job="reward" value="${job.reward || '৳২০'}" required>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Job Title</label>
+                        <input type="text" placeholder="Job Title" class="p-2 border rounded-lg w-full text-xs font-bold text-gray-800" data-job="title" value="${job.title || ''}" required>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Earning Highlights / Price Range Text</label>
+                        <input type="text" placeholder="প্রতি কাজে ৳২০ থেকে ৳৫০ পর্যন্ত নিশ্চিত আয়" class="p-2 border rounded-lg w-full text-xs font-bold text-blue-700" data-job="priceRangeText" value="${job.priceRangeText || ''}">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Key Features (কমা দিয়ে আলাদা করুন)</label>
+                        <input type="text" placeholder="ফিচার ১, ফিচার ২, ফিচার ৩" class="p-2 border rounded-lg w-full text-xs" data-job="features" value="${featuresStr}">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Description & Instructions</label>
+                        <input type="text" placeholder="কাজের বিবরণ..." class="p-2 border rounded-lg w-full text-xs text-gray-600" data-job="description" value="${job.description || ''}">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 text-emerald-600 rounded" data-job="isActive" ${isActiveChecked}>
+                        <span class="text-xs font-bold text-gray-700">কাজটি অ্যাপে সক্রিয় রাখুন (Enable this Job)</span>
+                    </label>
+                    <button class="btn btn-danger text-xs py-1 px-3" onclick="this.closest('.job-config-card').remove()">Remove Job</button>
+                </div>
+            `;
+            container.appendChild(card);
+            lucide.createIcons();
+        }
+
+        async function saveWorkJobsConfig() {
+            const isGlobalWorkEnabled = document.getElementById('toggle-global-work').checked;
+            const newJobs = [];
+
+            document.querySelectorAll('.job-config-card').forEach(card => {
+                const j = {};
+                card.querySelectorAll('[data-job]').forEach(input => {
+                    const field = input.dataset.job;
+                    if (input.type === 'checkbox') {
+                        j[field] = input.checked;
+                    } else if (field === 'features') {
+                        j[field] = input.value.split(',').map(s => s.trim()).filter(Boolean);
+                    } else {
+                        j[field] = input.value.trim();
+                    }
+                });
+                if (j.id && j.title) newJobs.push(j);
+            });
+
+            try {
+                const batch = writeBatch(dbWork);
+                const existingSnap = await getDocs(collection(dbWork, "available_jobs"));
+                existingSnap.docs.forEach(d => batch.delete(d.ref));
+
+                newJobs.forEach(job => {
+                    const docRef = doc(dbWork, "available_jobs", job.id);
+                    batch.set(docRef, job);
+                });
+
+                await batch.commit();
+
+                await setDoc(doc(dbUser, "config", "main"), {
+                    workSystemEnabled: isGlobalWorkEnabled,
+                    availableJobs: newJobs
+                }, { merge: true });
+
+                showAlert(`Work Marketplace কনফিগারেশন সফলভাবে dbWork এ সংরক্ষিত হয়েছে!`);
+            } catch(e) {
+                showAlert("সেটিং সংরক্ষণে সমস্যা: " + e.message);
+            }
+        }
+
+        // ================= DYNAMIC TASKS CONFIG =================
+        async function loadDynamicTasksConfig() {
+            const tasksContainer = document.getElementById('tasks-container');
+            tasksContainer.innerHTML = `<p class="text-xs text-gray-500">Loading tasks...</p>`;
+            
+            try {
+                let taskList = [];
+                const tasksQuery = query(collection(dbWork, "tasks"));
+                const taskSnap = await getDocs(tasksQuery);
+
+                if (!taskSnap.empty) {
+                    taskList = taskSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } else {
+                    await fetchAppConfig();
+                    taskList = appConfig.tasks || [];
+                }
+
+                tasksContainer.innerHTML = '';
+                taskList.forEach(task => addTaskToUI(task));
+                lucide.createIcons();
+            } catch(e) {
+                tasksContainer.innerHTML = `<p class="text-xs text-red-500">Error loading tasks: ${e.message}</p>`;
+            }
+        }
+
+        function addTaskToUI(task = {}) {
+            const container = document.getElementById('tasks-container');
+            const card = document.createElement('div');
+            card.className = 'p-5 border rounded-2xl bg-white task-config-card space-y-3 relative shadow-sm';
+
+            const taskId = task.id || ('task_' + Date.now());
+            const taskType = task.type || 'join';
+            const secretKeysStr = Array.isArray(task.secretKeys) ? task.secretKeys.join(', ') : (task.secretKeys || 'HUB99, EARN24, FREE10');
+
+            card.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Task Unique ID</label>
+                        <input type="text" placeholder="e.g. tg_official_join" class="p-2 border rounded-lg w-full text-xs font-mono" data-task="id" value="${taskId}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Task Category (প্রকার)</label>
+                        <select class="p-2 border rounded-lg w-full text-xs font-bold text-blue-700 bg-blue-50" data-task="type" onchange="toggleTaskFieldsUI(this)">
+                            <option value="join" ${taskType === 'join' ? 'selected' : ''}>join (Telegram Channel Join & Verify)</option>
+                            <option value="visit" ${taskType === 'visit' ? 'selected' : ''}>visit (Website Visit & Timer)</option>
+                            <option value="visit_bot" ${taskType === 'visit_bot' ? 'selected' : ''}>visit_bot (Telegram Bot Visit & Secret Key)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Reward (BDT)</label>
+                        <input type="number" step="0.1" placeholder="1.00" class="p-2 border rounded-lg w-full text-xs font-bold text-emerald-600" data-task="reward" value="${task.reward || 1.00}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Timer (Seconds - For Visit Task)</label>
+                        <input type="number" step="1" placeholder="5" class="p-2 border rounded-lg w-full text-xs font-bold text-orange-600" data-task="timerSeconds" value="${task.timerSeconds || 5}">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Task Title</label>
+                        <input type="text" placeholder="যেমন: Official Telegram Channel" class="p-2 border rounded-lg w-full text-xs font-bold" data-task="title" value="${task.title || ''}" required>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Task Subtitle / Instructions</label>
+                        <input type="text" placeholder="যেমন: চ্যানেলে জয়েন করে ভেরিফাই করুন" class="p-2 border rounded-lg w-full text-xs text-gray-600" data-task="subtitle" value="${task.subtitle || ''}">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Target Link / URL (Website URL / Telegram Invite Link)</label>
+                        <input type="url" placeholder="https://t.me/..." class="p-2 border rounded-lg w-full text-xs font-mono text-blue-600" data-task="url" value="${task.url || ''}" required>
+                    </div>
+
+                    <div class="md:col-span-2 channel-id-wrap ${taskType !== 'join' ? 'hidden' : ''}">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Telegram Chat ID / Username (For Bot Check)</label>
+                        <input type="text" placeholder="@ChannelUsername অথবা -100123456789" class="p-2 border rounded-lg w-full text-xs font-mono text-indigo-700 bg-indigo-50/50" data-task="chatId" value="${task.chatId || ''}">
+                    </div>
+
+                    <div class="md:col-span-2 secret-key-wrap ${taskType !== 'visit_bot' ? 'hidden' : ''}">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Bot Valid Secret Keys (কমা দিয়ে একাধিক Key দিন)</label>
+                        <input type="text" placeholder="KEY1, KEY2, KEY3" class="p-2 border rounded-lg w-full text-xs font-mono text-emerald-700 bg-emerald-50/50" data-task="secretKeys" value="${secretKeysStr}">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <span class="text-[11px] text-gray-400 font-semibold">বট টাস্কে ইউজারকে যে Secret Key দিতে হবে তা এখানে উল্লেখ করুন।</span>
+                    <button class="btn btn-danger text-xs py-1 px-3" onclick="this.closest('.task-config-card').remove()">Remove Task</button>
+                </div>
+            `;
+            container.appendChild(card);
+            lucide.createIcons();
+        }
+
+        window.toggleTaskFieldsUI = function(selectEl) {
+            const card = selectEl.closest('.task-config-card');
+            const channelWrap = card.querySelector('.channel-id-wrap');
+            const secretWrap = card.querySelector('.secret-key-wrap');
+            if (selectEl.value === 'join') {
+                channelWrap.classList.remove('hidden');
+                secretWrap.classList.add('hidden');
+            } else if (selectEl.value === 'visit_bot') {
+                channelWrap.classList.add('hidden');
+                secretWrap.classList.remove('hidden');
+            } else {
+                channelWrap.classList.add('hidden');
+                secretWrap.classList.add('hidden');
+            }
+        };
+
+        async function saveDynamicTasksConfig() {
+            const newTasks = [];
+            document.querySelectorAll('.task-config-card').forEach(card => {
+                const t = {};
+                card.querySelectorAll('[data-task]').forEach(input => {
+                    const field = input.dataset.task;
+                    let val = input.value.trim();
+                    if (field === 'reward') val = parseFloat(val) || 0;
+                    if (field === 'timerSeconds') val = parseInt(val) || 5;
+                    if (field === 'secretKeys') {
+                        val = val.split(',').map(k => k.trim()).filter(Boolean);
+                    }
+                    t[field] = val;
+                });
+                if (t.id && t.title && t.url) newTasks.push(t);
+            });
+
+            try {
+                const batch = writeBatch(dbWork);
+                const existingSnap = await getDocs(collection(dbWork, "tasks"));
+                existingSnap.docs.forEach(d => batch.delete(d.ref));
+
+                newTasks.forEach(task => {
+                    const docRef = doc(dbWork, "tasks", task.id);
+                    batch.set(docRef, task);
+                });
+
+                await batch.commit();
+
+                // Store single-use keys in collection for instant lookup
+                for (const task of newTasks) {
+                    if (task.type === 'visit_bot' && Array.isArray(task.secretKeys)) {
+                        for (const keyStr of task.secretKeys) {
+                            const upperKey = keyStr.toUpperCase();
+                            await setDoc(doc(dbWork, "bot_secret_keys", upperKey), {
+                                key: upperKey,
+                                taskId: task.id,
+                                isUsed: false,
+                                createdAt: serverTimestamp()
+                            }, { merge: true });
+                        }
+                    }
+                }
+
+                await setDoc(doc(dbUser, "config", "main"), { tasks: newTasks }, { merge: true });
+                showAlert(`সফলভাবে ${newTasks.length} টি টাস্ক dbWork এ সংরক্ষিত হয়েছে!`);
+            } catch(e) {
+                showAlert("টাস্ক সংরক্ষণে ত্রুটি: " + e.message);
+            }
+        }
+
+        // ================= BULK STOCK UPLOAD (FIXED & HIGH CAPACITY) =================
+        async function loadAddStockPage() {
+            await fetchAppConfig();
+            const selectEl = document.getElementById('mail-type-select-add');
+            selectEl.innerHTML = '<option value="">Select product to add stock...</option>';
+            
+            if (!appConfig.mails || appConfig.mails.length === 0) {
+                selectEl.innerHTML += '<option disabled>No products configured yet</option>';
+                return;
+            }
+
+            appConfig.mails.forEach(mail => {
+                const key = mail.stockKey || (mail.type ? mail.type.toLowerCase().replace(/\s+/g, '_') + '_stock' : '');
+                selectEl.innerHTML += `<option value="${key}">${mail.type} (Collection: ${key})</option>`;
+            });
+        }
+
+        async function handleAddMails() {
+            const stockKey = document.getElementById('mail-type-select-add').value;
+            const mailDataRaw = document.getElementById('mail-data-textarea').value;
+
+            if (!stockKey) return showAlert("দয়া করে ড্রপডাউন থেকে প্রোডাক্ট নির্বাচন করুন।");
+            if (!mailDataRaw.trim()) return showAlert("দয়া করে স্টকের তথ্য পেস্ট করুন।");
+
+            const lines = mailDataRaw.trim().split('\n').map(l => l.trim()).filter(Boolean);
+            if (lines.length === 0) return showAlert("কোনো সঠিক ডাটা লাইন পাওয়া যায়নি।");
+
+            const btn = document.getElementById('add-mails-btn');
+            const progressBox = document.getElementById('upload-progress-box');
+            const progressText = document.getElementById('upload-progress-text');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Uploading...`;
+            progressBox.classList.remove('hidden');
+
+            try {
+                const CHUNK_SIZE = 400; // Under Firestore 500 limit
+                let totalUploaded = 0;
+
+                for (let i = 0; i < lines.length; i += CHUNK_SIZE) {
+                    const chunk = lines.slice(i, i + CHUNK_SIZE);
+                    const batch = writeBatch(dbShop);
+
+                    chunk.forEach(line => {
+                        let email = null;
+                        let password = null;
+                        let rawData = line;
+
+                        if (line.includes('/')) {
+                            const p = line.split('/');
+                            email = p[0].trim();
+                            password = p.slice(1).join('/').trim();
+                        } else if (line.includes(':')) {
+                            const p = line.split(':');
+                            email = p[0].trim();
+                            password = p.slice(1).join(':').trim();
+                        } else if (line.includes('|')) {
+                            const p = line.split('|');
+                            email = p[0].trim();
+                            password = p.slice(1).join('|').trim();
+                        }
+
+                        const itemRef = doc(collection(dbShop, stockKey));
+                        const itemPayload = {
+                            isSold: false,
+                            createdAt: serverTimestamp()
+                        };
+
+                        if (email) {
+                            itemPayload.email = email;
+                            itemPayload.password = password || '';
+                        } else {
+                            itemPayload.data = rawData;
+                        }
+
+                        batch.set(itemRef, itemPayload);
+                    });
+
+                    await batch.commit();
+                    totalUploaded += chunk.length;
+                    progressText.textContent = `Uploaded ${totalUploaded} / ${lines.length} items...`;
+                }
+
+                showAlert(`🎉 সফলভাবে ${totalUploaded} টি আইটেম '${stockKey}' কালেকশনে স্টক করা হয়েছে!`);
+                document.getElementById('mail-data-textarea').value = '';
+                loadStockOverview();
+            } catch(e) {
+                console.error(e);
+                showAlert("স্টক আপলোড ব্যর্থ হয়েছে: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `Upload Stock to Firebase`;
+                progressBox.classList.add('hidden');
+            }
+        }
+
+        // --- MANAGE STOCK ITEMS ---
+        async function loadManageMailsPage() {
+            await fetchAppConfig();
+            const selectEl = document.getElementById('mail-type-select-manage');
+            selectEl.innerHTML = '<option value="">Select product to view...</option>';
+            appConfig.mails.forEach(mail => {
+                selectEl.innerHTML += `<option value="${mail.stockKey}">${mail.type}</option>`;
+            });
+            document.getElementById('individual-mails-container').innerHTML = '<p class="text-gray-400 text-sm">Please select a product type above to view unsold inventory.</p>';
+        }
+
+        async function fetchAndDisplayMails(stockKey) {
+            const container = document.getElementById('individual-mails-container');
+            if (!stockKey) { container.innerHTML = '<p class="text-gray-400 text-sm">Please select a product type.</p>'; return; }
+            container.innerHTML = '<p class="text-sm text-gray-500 py-4">Fetching stock items...</p>';
+
+            try {
+                const q = query(collection(dbShop, stockKey), where("isSold", "==", false));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="text-gray-500 py-4 font-semibold text-xs">No unsold items found in stock.</p>`;
+                    return;
+                }
+
+                const buttonsHTML = `
+                    <div class="flex items-center space-x-3 mb-4">
+                        <button class="btn btn-primary text-xs" onclick="window.copyAllUnsold('${stockKey}')"><i data-lucide="copy" class="w-3.5 h-3.5"></i>Copy All (${snapshot.size})</button>
+                        <button class="btn btn-danger text-xs" onclick="window.deleteAllUnsold('${stockKey}')"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Delete All (${snapshot.size})</button>
+                    </div>`;
+                
+                const tableHTML = `
+                    <table class="min-w-full">
+                        <thead><tr><th>Item Data / Email</th><th>Password</th><th>Created At</th><th>Action</th></tr></thead>
+                        <tbody>${snapshot.docs.map(docSnap => {
+                            const d = docSnap.data();
+                            return `<tr>
+                                <td class="font-mono text-xs">${d.email || d.data || 'N/A'}</td>
+                                <td class="font-mono text-xs">${d.password || 'N/A'}</td>
+                                <td class="text-xs text-gray-500">${d.createdAt?.toDate().toLocaleDateString('en-GB') || 'N/A'}</td>
+                                <td><button class="btn btn-danger text-xs py-1 px-2.5" onclick="window.deleteSingleStock('${stockKey}', '${docSnap.id}')">Delete</button></td>
+                            </tr>`;
+                        }).join('')}</tbody>
+                    </table>`;
+
+                container.innerHTML = buttonsHTML + tableHTML;
+                lucide.createIcons();
+            } catch(e) {
+                container.innerHTML = `<p class="text-red-500 text-xs">Error loading stock: ${e.message}</p>`;
+            }
+        }
+
+        window.deleteSingleStock = (stockKey, docId) => {
+            showConfirm("Delete this item from stock?", async () => {
+                await deleteDoc(doc(dbShop, stockKey, docId));
+                fetchAndDisplayMails(stockKey);
+            });
+        };
+
+        window.deleteAllUnsold = (stockKey) => {
+            showConfirm("Are you sure you want to DELETE ALL unsold items for this product?", async () => {
+                const snapshot = await getDocs(query(collection(dbShop, stockKey), where("isSold", "==", false)));
+                const batch = writeBatch(dbShop);
+                snapshot.docs.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+                showAlert("All unsold stock items deleted.");
+                fetchAndDisplayMails(stockKey);
+            });
+        };
+
+        window.copyAllUnsold = async (stockKey) => {
+            const snapshot = await getDocs(query(collection(dbShop, stockKey), where("isSold", "==", false)));
+            const text = snapshot.docs.map(d => {
+                const data = d.data();
+                return data.email ? `${data.email}/${data.password || ''}` : data.data;
+            }).join('\n');
+            navigator.clipboard.writeText(text).then(() => showAlert(`Copied ${snapshot.size} items to clipboard!`));
+        };
+
+        // --- NOTIFICATIONS ---
+        async function handleBroadcastNotification() {
+            const title = document.getElementById('broadcast-title').value.trim();
+            const message = document.getElementById('broadcast-message').value.trim();
+            if (!title || !message) return showAlert("Please provide both title and message.");
+            
+            await fetchAppConfig();
+            const notices = appConfig.notices || [];
+            notices.unshift({
+                title: title,
+                message: message,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            await setDoc(doc(dbUser, "config", "main"), { notices: notices }, { merge: true });
+            showAlert("Broadcast notice sent successfully to all users!");
+            document.getElementById('broadcast-title').value = '';
+            document.getElementById('broadcast-message').value = '';
+        }
+
+        async function handleDirectNotification() {
+            const userId = document.getElementById('direct-user-id').value.trim();
+            const title = document.getElementById('direct-title').value.trim();
+            const message = document.getElementById('direct-message').value.trim();
+            if (!userId || !title || !message) return showAlert("Please fill in User ID, title, and message.");
+            
+            await sendInAppNotification(userId, title, message);
+            showAlert(`Notification sent to User ID: ${userId}`);
+            document.getElementById('direct-user-id').value = '';
+            document.getElementById('direct-title').value = '';
+            document.getElementById('direct-message').value = '';
+        }
+
+        // ================= CONFIG LOADERS & SAVERS =================
+
+        // 1. PRODUCTS CONFIG
+        async function loadProductsConfig() {
+            await fetchAppConfig();
+            const mailTypesContainer = document.getElementById('mail-types-container');
+            mailTypesContainer.innerHTML = '';
+            appConfig.mails.forEach(mail => addMailTypeToUI(mail));
+            lucide.createIcons();
+        }
+
+        function addMailTypeToUI(mail = {}) {
+            const container = document.getElementById('mail-types-container');
+            const card = document.createElement('div');
+            card.className = 'p-5 border rounded-2xl bg-white mail-type-card space-y-3 relative shadow-sm';
+            const isPopularChecked = (mail.isPopular || mail.popular) ? 'checked' : '';
+            const allowManualChecked = mail.allowManual === true ? 'checked' : '';
+
+            card.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Product Title</label>
+                        <input type="text" placeholder="e.g., Hotmail Fresh" class="p-2 border rounded-lg w-full text-xs font-bold" data-field="type" value="${mail.type || ''}" required>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Stock Collection Key</label>
+                        <input type="text" placeholder="e.g., hotmail_stock" class="p-2 border rounded-lg w-full text-xs font-mono" data-field="stockKey" value="${mail.stockKey || ''}" required>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Category</label>
+                        <input type="text" placeholder="Hotmail / Gmail / Proxy" class="p-2 border rounded-lg w-full text-xs font-bold text-indigo-600" data-field="category" value="${mail.category || 'Hotmail'}" required>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Price (BDT)</label>
+                        <input type="number" step="0.01" placeholder="35.00" class="p-2 border rounded-lg w-full text-xs font-bold text-blue-600" data-field="priceBdt" value="${mail.priceBdt || ''}" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Logo URL (Icon)</label>
+                        <input type="url" placeholder="https://..." class="p-2 border rounded-lg w-full text-xs" data-field="logoUrl" value="${mail.logoUrl || ''}">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Custom API URL (Optional)</label>
+                        <input type="url" placeholder="https://api..." class="p-2 border rounded-lg w-full text-xs font-mono" data-field="apiUrl" value="${mail.apiUrl || ''}">
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Details / Description</label>
+                        <textarea placeholder="Product description and usage instructions..." class="p-2 border rounded-lg w-full text-xs" data-field="details" rows="2">${mail.details || ''}</textarea>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded" data-field="isPopular" ${isPopularChecked}>
+                            <span class="text-xs font-bold text-orange-600 flex items-center gap-1">🔥 Highlight in App</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 text-emerald-600 rounded" data-field="allowManual" ${allowManualChecked}>
+                            <span class="text-xs font-bold text-emerald-700">Allow Pre-Order (When Out of Stock)</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-danger text-xs py-1 px-3" onclick="this.closest('.mail-type-card').remove()">Remove Product</button>
+                </div>`;
+            container.appendChild(card);
+            lucide.createIcons();
+        }
+
+        async function saveProductsConfig() {
+            const newMails = [];
+            document.querySelectorAll('.mail-type-card').forEach(card => {
+                const mail = {};
+                card.querySelectorAll('[data-field]').forEach(input => {
+                    const field = input.dataset.field;
+                    if (input.type === 'checkbox') {
+                        mail[field] = input.checked;
+                    } else {
+                        let val = input.value.trim();
+                        if (field === 'priceBdt') val = parseFloat(val) || 0;
+                        mail[field] = val;
+                    }
+                });
+                if (mail.type && mail.stockKey && mail.priceBdt > 0) newMails.push(mail);
+            });
+
+            await setDoc(doc(dbUser, "config", "main"), { mails: newMails }, { merge: true });
+            showAlert("Products and services saved successfully!");
+            loadAddStockPage();
+        }
+
+        // 2. CATEGORIES CONFIG
+        async function loadCategoriesConfig() {
+            await fetchAppConfig();
+            const catContainer = document.getElementById('categories-container');
+            catContainer.innerHTML = '';
+            const defaultCats = [
+                { id: "all", name: "All", icon: "layout-grid" },
+                { id: "Hotmail", name: "Hotmail", icon: "mail" },
+                { id: "Gmail", name: "Gmail", icon: "tag" },
+                { id: "Proxy", name: "Proxy", icon: "globe" },
+                { id: "VPN", name: "VPN", icon: "shield-check" },
+                { id: "Social", name: "Social", icon: "users" }
+            ];
+            const catsToLoad = (appConfig.categories && appConfig.categories.length > 0) ? appConfig.categories : defaultCats;
+            catsToLoad.forEach(cat => addCategoryToUI(cat));
+            lucide.createIcons();
+        }
+
+        function addCategoryToUI(cat = {}) {
+            const container = document.getElementById('categories-container');
+            const div = document.createElement('div');
+            div.className = 'p-3 bg-gray-50 border rounded-xl flex items-center gap-3 category-card';
+            div.innerHTML = `
+                <div class="w-1/3">
+                    <label class="block text-[10px] font-bold text-gray-500">Category ID</label>
+                    <input type="text" placeholder="Hotmail" class="p-2 border rounded-lg w-full text-xs font-bold" data-cat="id" value="${cat.id || ''}" required>
+                </div>
+                <div class="w-1/3">
+                    <label class="block text-[10px] font-bold text-gray-500">Display Name</label>
+                    <input type="text" placeholder="Hotmail" class="p-2 border rounded-lg w-full text-xs font-bold" data-cat="name" value="${cat.name || ''}" required>
+                </div>
+                <div class="w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500">Lucide Icon Name</label>
+                    <input type="text" placeholder="mail" class="p-2 border rounded-lg w-full text-xs font-mono" data-cat="icon" value="${cat.icon || 'tag'}">
+                </div>
+                <button type="button" class="btn btn-danger text-xs p-2 mt-3" onclick="this.closest('.category-card').remove()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        }
+
+        async function saveCategoriesConfig() {
+            const newCategories = [];
+            document.querySelectorAll('.category-card').forEach(card => {
+                const cat = {};
+                card.querySelectorAll('[data-cat]').forEach(input => {
+                    cat[input.dataset.cat] = input.value.trim();
+                });
+                if (cat.id && cat.name) newCategories.push(cat);
+            });
+
+            await setDoc(doc(dbUser, "config", "main"), { categories: newCategories }, { merge: true });
+            showAlert("Categories saved successfully!");
+        }
+
+        // 3. PAYMENT METHODS CONFIG
+        async function loadPaymentsConfig() {
+            await fetchAppConfig();
+            const pmContainer = document.getElementById('payment-methods-container');
+            pmContainer.innerHTML = '';
+            const defaultPMs = [
+                { id: "Nagad", name: "নগদ (Personal)", number: "01864260513", icon: "https://i.postimg.cc/Jh9s6jWw/20250922-113350.png" },
+                { id: "bKash", name: "বিকাশ (Personal)", number: "01827750260", icon: "https://i.postimg.cc/tCwGVkdH/20250922-113514.png" },
+                { id: "Rocket", name: "রকেট (Personal)", number: "018277502604", icon: "https://i.postimg.cc/htsw10Tj/20250922-113924.png" },
+                { id: "Binance", name: "Binance Pay ID", number: "1105989483", icon: "https://i.postimg.cc/L6LFLfxY/20250922-113752.png" }
+            ];
+            const pmsToLoad = (appConfig.paymentMethods && appConfig.paymentMethods.length > 0) ? appConfig.paymentMethods : defaultPMs;
+            pmsToLoad.forEach(pm => addPaymentMethodToUI(pm));
+            lucide.createIcons();
+        }
+
+        function addPaymentMethodToUI(pm = {}) {
+            const container = document.getElementById('payment-methods-container');
+            const div = document.createElement('div');
+            div.className = 'p-3 bg-gray-50 border rounded-xl flex flex-col md:flex-row items-center gap-3 payment-method-card';
+            div.innerHTML = `
+                <div class="w-full md:w-1/5">
+                    <label class="block text-[10px] font-bold text-gray-500">Method ID</label>
+                    <input type="text" placeholder="bKash" class="p-2 border rounded-lg w-full text-xs font-bold" data-pm="id" value="${pm.id || ''}" required>
+                </div>
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500">Display Name</label>
+                    <input type="text" placeholder="বিকাশ (Personal)" class="p-2 border rounded-lg w-full text-xs font-bold" data-pm="name" value="${pm.name || ''}" required>
+                </div>
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500">Payment Number / ID</label>
+                    <input type="text" placeholder="018..." class="p-2 border rounded-lg w-full text-xs font-mono font-bold" data-pm="number" value="${pm.number || ''}" required>
+                </div>
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500">Icon URL</label>
+                    <input type="url" placeholder="https://..." class="p-2 border rounded-lg w-full text-xs" data-pm="icon" value="${pm.icon || ''}">
+                </div>
+                <button type="button" class="btn btn-danger text-xs p-2 mt-3 md:mt-0" onclick="this.closest('.payment-method-card').remove()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        }
+
+        async function savePaymentsConfig() {
+            const newPaymentMethods = [];
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                const pm = {};
+                card.querySelectorAll('[data-pm]').forEach(input => {
+                    pm[input.dataset.pm] = input.value.trim();
+                });
+                if (pm.id && pm.number) newPaymentMethods.push(pm);
+            });
+
+            await setDoc(doc(dbUser, "config", "main"), { paymentMethods: newPaymentMethods }, { merge: true });
+            showAlert("Payment methods and numbers saved successfully!");
+        }
+
+        // 4. ORDER RULES, ACTIVATION FEE & WITHDRAW CONFIG
+        async function loadOrderRulesConfig() {
+            await fetchAppConfig();
+            document.getElementById('rule-allow-manual').checked = appConfig.allowManualOrder !== false;
+            document.getElementById('rule-timeout-minutes').value = appConfig.manualOrderTimeoutMinutes || 30;
+            document.getElementById('rule-activation-fee').value = appConfig.activationFee !== undefined ? appConfig.activationFee : 10;
+            document.getElementById('rule-referral-bonus').value = appConfig.referralBonus !== undefined ? appConfig.referralBonus : 10;
+        }
+
+        async function saveOrderRulesConfig() {
+            const allowManualOrder = document.getElementById('rule-allow-manual').checked;
+            const timeoutMinutes = parseInt(document.getElementById('rule-timeout-minutes').value) || 30;
+            const actFee = parseFloat(document.getElementById('rule-activation-fee').value) || 10;
+            const refBonus = parseFloat(document.getElementById('rule-referral-bonus').value) || 10;
+
+            await setDoc(doc(dbUser, "config", "main"), {
+                allowManualOrder: allowManualOrder,
+                manualOrderTimeoutMinutes: timeoutMinutes,
+                activationFee: actFee,
+                referralBonus: refBonus
+            }, { merge: true });
+
+            showAlert("Order rules, activation fee and referral settings saved successfully!");
+        }
+
+        // 5. TELEGRAM BOT & SUPPORT CONFIG
+        async function loadBotAndSupportConfig() {
+            await fetchAppConfig();
+            document.getElementById('setting-bot-token').value = appConfig.botToken || '';
+            document.getElementById('setting-admin-chat-id').value = appConfig.adminChatId || '6954647230';
+            document.getElementById('support-telegram').value = appConfig.telegramSupportUrl || '';
+            document.getElementById('support-whatsapp').value = appConfig.whatsappSupportUrl || '';
+            document.getElementById('support-channel').value = appConfig.telegramChannelUrl || '';
+            document.getElementById('support-bot-username').value = appConfig.botUsername || 'Gmail_HUB7bot';
+
+            document.getElementById('msg-withdraw-success').value = appConfig.msgWithdrawSuccess || `✅ <b>আপনার ৳{amount} উইথড্রয়াল সফল হয়েছে!</b>\nপেমেন্ট মেথড: {method}\nটাকা আপনার অ্যাকাউন্টে পাঠিয়ে দেওয়া হয়েছে। ধন্যবাদ!`;
+            document.getElementById('msg-master-approved').value = appConfig.msgMasterApproved || `🎉 <b>আপনার Master Work ট্রেনিং আবেদন অনুমোদিত হয়েছে!</b>\n\nআপনি এখন মিনি অ্যাপ থেকে সরাসরি Master Work টাস্ক সাবমিট করতে পারবেন। আমাদের ট্রেইনার আপনার সাথে যোগাযোগ করবেন।`;
+            document.getElementById('msg-master-rejected').value = appConfig.msgMasterRejected || `❌ <b>আপনার Master Work ট্রেনিং আবেদনটি বাতিল করা হয়েছে!</b>\n\nআপনি আগামী ২৪ ঘণ্টা পর অ্যাপ থেকে পুনরায় সঠিক তথ্য দিয়ে আবেদন করতে পারবেন।`;
+        }
+
+        async function saveBotAndSupportConfig() {
+            const botToken = document.getElementById('setting-bot-token').value.trim();
+            const adminId = document.getElementById('setting-admin-chat-id').value.trim();
+            const tgSupport = document.getElementById('support-telegram').value.trim();
+            const waSupport = document.getElementById('support-whatsapp').value.trim();
+            const tgChannel = document.getElementById('support-channel').value.trim();
+            const botUser = document.getElementById('support-bot-username').value.trim() || 'Gmail_HUB7bot';
+
+            const msgWithdraw = document.getElementById('msg-withdraw-success').value.trim();
+            const msgMApproved = document.getElementById('msg-master-approved').value.trim();
+            const msgMRejected = document.getElementById('msg-master-rejected').value.trim();
+
+            await setDoc(doc(dbUser, "config", "main"), {
+                botToken: botToken,
+                adminChatId: adminId,
+                telegramSupportUrl: tgSupport,
+                whatsappSupportUrl: waSupport,
+                telegramChannelUrl: tgChannel,
+                botUsername: botUser,
+                msgWithdrawSuccess: msgWithdraw,
+                msgMasterApproved: msgMApproved,
+                msgMasterRejected: msgMRejected
+            }, { merge: true });
+
+            showAlert("Telegram Bot, Support links and message templates saved successfully!");
+        }
+
+        // --- UTILITY MODALS ---
+        function showAlert(message) {
+            document.getElementById('alert-message').textContent = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        }
+
+        function showConfirm(message, onConfirm) {
+            const confirmModal = document.getElementById('custom-confirm');
+            document.getElementById('confirm-message').textContent = message;
+            confirmModal.classList.remove('hidden');
+            const okBtn = document.getElementById('confirm-ok-btn');
+            const cancelBtn = document.getElementById('confirm-cancel-btn');
+            const okListener = () => { onConfirm(); cleanup(); };
+            const cancelListener = () => cleanup();
+            function cleanup() {
+                confirmModal.classList.add('hidden');
+                okBtn.removeEventListener('click', okListener);
+                cancelBtn.removeEventListener('click', cancelListener);
+            }
+            okBtn.addEventListener('click', okListener, { once: true });
+            cancelBtn.addEventListener('click', cancelListener, { once: true });
+        }
+
+        // Global functions attachment
+        window.loadStockOverview = loadStockOverview;
+        window.toggleBlockUser = toggleBlockUser;
+        window.openBalanceModal = openBalanceModal;
+        window.handleDepositAction = handleDepositAction;
+        window.handleReplaceAction = handleReplaceAction;
+        window.deleteSingleStock = deleteSingleStock;
+        window.copyAllUnsold = copyAllUnsold;
+        window.deleteAllUnsold = deleteAllUnsold;
+        window.loadAddStockPage = loadAddStockPage;
+    </script>
+</body>
+</html>
