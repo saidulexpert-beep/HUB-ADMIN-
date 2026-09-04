@@ -48,7 +48,7 @@
                 <h1 class="text-2xl font-black text-gray-900">GMAIL HUB Admin</h1>
                 <p class="text-xs text-gray-500 mt-1">Please authenticate with Authorized Admin Credentials</p>
                 <div class="mt-2 py-1 px-3 bg-blue-50 rounded-lg text-[11px] font-mono text-blue-700 font-bold">
-                    Admin UID: PGlP7mf3kjPpLATWiseGP4A5Oyi2
+                    Admin UID: JeVQXKMTLEWo5O86RfXKLmk2bi43
                 </div>
             </div>
             <div class="space-y-4">
@@ -313,7 +313,7 @@
                    </div>
                 </div>
 
-                <!-- 10. NEW: ACCOUNT SELL SERVICES MANAGEMENT (dbWork) -->
+                <!-- 10. ACCOUNT SELL SERVICES MANAGEMENT -->
                 <div id="set-sell-services-page" class="page">
                     <div class="flex items-center justify-between mb-6">
                         <div>
@@ -372,7 +372,7 @@
                     <div id="tasks-container" class="space-y-4"></div>
                 </div>
 
-                <!-- 13. ADD STOCK PAGE (FIXED & HIGH CAPACITY) -->
+                <!-- 13. ADD STOCK PAGE -->
                 <div id="stock-page" class="page">
                     <div class="flex items-center justify-between mb-6">
                         <div>
@@ -665,29 +665,17 @@
 
     <!-- FIREBASE & CORE ENGINE -->
     <script type="module">
-        const TARGET_ADMIN_UID = "PGlP7mf3kjPpLATWiseGP4A5Oyi2";
+        // 1. UPDATED AUTHORIZED ADMIN UID
+        const TARGET_ADMIN_UID = "JeVQXKMTLEWo5O86RfXKLmk2bi43";
 
-        // 1. PRIMARY APP (FOR AUTH, USERS, DEPOSITS, WITHDRAWALS & GLOBAL CONFIG)
-        const userFirebaseConfig = {
-            apiKey: "AIzaSyBopnlRjMScCBaKaxvYsZesAvzxtEjSFRw",
-            authDomain: "rkrj-abffe.firebaseapp.com",
-            databaseURL: "https://rkrj-abffe-default-rtdb.firebaseio.com",
-            projectId: "rkrj-abffe",
-            storageBucket: "rkrj-abffe.firebasestorage.app",
-            messagingSenderId: "677055084635",
-            appId: "1:677055084635:web:fe5010f2fc94e76d0e277e"
-        };
-
-        // 2. SHOP & WORK SHARED FIREBASE CONFIG
-        const sharedShopWorkFirebaseConfig = {
-            apiKey: "AIzaSyALek-biuraaH0F8w2tVmLIToB7WvCMANY",
-            authDomain: "xadminbd-8c45b.firebaseapp.com",
-            databaseURL: "https://xadminbd-8c45b-default-rtdb.firebaseio.com",
-            projectId: "xadminbd-8c45b",
-            storageBucket: "xadminbd-8c45b.firebasestorage.app",
-            messagingSenderId: "366297743215",
-            appId: "1:366297743215:web:46b005f88734d51b6cb29a",
-            measurementId: "G-4LXNTDMMZ6"
+        // 2. UNIFIED FIREBASE CONFIG (AS REQUESTED)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_Qj_G_FOrlSehcj6qjdYB8x_G-yIyWnU",
+            authDomain: "hub-54f3d.firebaseapp.com",
+            projectId: "hub-54f3d",
+            storageBucket: "hub-54f3d.firebasestorage.app",
+            messagingSenderId: "379028334299",
+            appId: "1:379028334299:web:20b8340f8115cd10de0efe"
         };
         
         import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -698,18 +686,18 @@
             runTransaction, orderBy, limit, getCountFromServer, increment, Timestamp, enableNetwork 
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // Multi-Database Setup
-        const appUser = !getApps().length ? initializeApp(userFirebaseConfig) : getApp();
-        const appShopWork = initializeApp(sharedShopWorkFirebaseConfig, "adminShopWorkApp");
+        // Unified Single Database Setup
+        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        const auth = getAuth(appUser);
-        const dbUser = getFirestore(appUser);
-        const dbShop = getFirestore(appShopWork);
-        const dbWork = getFirestore(appShopWork);
+        // Aliases to maintain full system compatibility
+        const dbUser = db;
+        const dbShop = db;
+        const dbWork = db;
 
         // Safeguard network
-        try { enableNetwork(dbUser); } catch(e) {}
-        try { enableNetwork(dbShop); } catch(e) {}
+        try { enableNetwork(db); } catch(e) {}
 
         const loginView = document.getElementById('admin-login-view');
         const dashboardView = document.getElementById('admin-dashboard');
@@ -1566,7 +1554,7 @@
             }).join('');
         }
 
-        // ================= NEW: ACCOUNT SELL SERVICES CONFIG (dbWork) =================
+        // ================= ACCOUNT SELL SERVICES CONFIG =================
         async function loadSellServicesConfig() {
             const container = document.getElementById('sell-services-container');
             container.innerHTML = `<p class="text-xs text-gray-500">Loading sell services...</p>`;
@@ -1706,7 +1694,7 @@
                     sellServices: newServices
                 }, { merge: true });
 
-                showAlert("Account Sell Services সফলভাবে dbWork এ সংরক্ষিত হয়েছে!");
+                showAlert("Account Sell Services সফলভাবে ডাটাবেসে সংরক্ষিত হয়েছে!");
             } catch(e) {
                 showAlert("সেভ করতে সমস্যা হয়েছে: " + e.message);
             }
@@ -1845,7 +1833,7 @@
                     availableJobs: newJobs
                 }, { merge: true });
 
-                showAlert(`Work Marketplace কনফিগারেশন সফলভাবে dbWork এ সংরক্ষিত হয়েছে!`);
+                showAlert(`Work Marketplace কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!`);
             } catch(e) {
                 showAlert("সেটিং সংরক্ষণে সমস্যা: " + e.message);
             }
@@ -2007,13 +1995,13 @@
                 }
 
                 await setDoc(doc(dbUser, "config", "main"), { tasks: newTasks }, { merge: true });
-                showAlert(`সফলভাবে ${newTasks.length} টি টাস্ক dbWork এ সংরক্ষিত হয়েছে!`);
+                showAlert(`সফলভাবে ${newTasks.length} টি টাস্ক ডাটাবেসে সংরক্ষিত হয়েছে!`);
             } catch(e) {
                 showAlert("টাস্ক সংরক্ষণে ত্রুটি: " + e.message);
             }
         }
 
-        // ================= BULK STOCK UPLOAD (FIXED & HIGH CAPACITY) =================
+        // ================= BULK STOCK UPLOAD =================
         async function loadAddStockPage() {
             await fetchAppConfig();
             const selectEl = document.getElementById('mail-type-select-add');
@@ -2384,144 +2372,134 @@
         function addPaymentMethodToUI(pm = {}) {
             const container = document.getElementById('payment-methods-container');
             const div = document.createElement('div');
-            div.className = 'p-3 bg-gray-50 border rounded-xl flex flex-col md:flex-row items-center gap-3 payment-method-card';
+            div.className = 'p-3 bg-gray-50 border rounded-xl flex items-center gap-3 payment-method-card';
             div.innerHTML = `
-                <div class="w-full md:w-1/5">
-                    <label class="block text-[10px] font-bold text-gray-500">Method ID</label>
-                    <input type="text" placeholder="bKash" class="p-2 border rounded-lg w-full text-xs font-bold" data-pm="id" value="${pm.id || ''}" required>
+                <div class="w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500">Method Name</label>
+                    <input type="text" placeholder="bKash" class="p-2 border rounded-lg w-full text-xs font-bold" data-pm="name" value="${pm.name || ''}" required>
                 </div>
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500">Display Name</label>
-                    <input type="text" placeholder="বিকাশ (Personal)" class="p-2 border rounded-lg w-full text-xs font-bold" data-pm="name" value="${pm.name || ''}" required>
-                </div>
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500">Payment Number / ID</label>
+                <div class="w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500">Account Number</label>
                     <input type="text" placeholder="018..." class="p-2 border rounded-lg w-full text-xs font-mono font-bold" data-pm="number" value="${pm.number || ''}" required>
                 </div>
-                <div class="w-full md:w-1/4">
+                <div class="w-1/3">
                     <label class="block text-[10px] font-bold text-gray-500">Icon URL</label>
-                    <input type="url" placeholder="https://..." class="p-2 border rounded-lg w-full text-xs" data-pm="icon" value="${pm.icon || ''}">
+                    <input type="url" placeholder="https://..." class="p-2 border rounded-lg w-full text-xs font-mono" data-pm="icon" value="${pm.icon || ''}">
                 </div>
-                <button type="button" class="btn btn-danger text-xs p-2 mt-3 md:mt-0" onclick="this.closest('.payment-method-card').remove()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <button type="button" class="btn btn-danger text-xs p-2 mt-3" onclick="this.closest('.payment-method-card').remove()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             `;
             container.appendChild(div);
             lucide.createIcons();
         }
 
         async function savePaymentsConfig() {
-            const newPaymentMethods = [];
+            const newPMs = [];
             document.querySelectorAll('.payment-method-card').forEach(card => {
                 const pm = {};
                 card.querySelectorAll('[data-pm]').forEach(input => {
                     pm[input.dataset.pm] = input.value.trim();
                 });
-                if (pm.id && pm.number) newPaymentMethods.push(pm);
+                if (pm.name && pm.number) newPMs.push(pm);
             });
 
-            await setDoc(doc(dbUser, "config", "main"), { paymentMethods: newPaymentMethods }, { merge: true });
-            showAlert("Payment methods and numbers saved successfully!");
+            await setDoc(doc(dbUser, "config", "main"), { paymentMethods: newPMs }, { merge: true });
+            showAlert("Payment numbers saved successfully!");
         }
 
-        // 4. ORDER RULES, ACTIVATION FEE & WITHDRAW CONFIG
+        // 4. ORDER RULES & FEES CONFIG
         async function loadOrderRulesConfig() {
             await fetchAppConfig();
-            document.getElementById('rule-allow-manual').checked = appConfig.allowManualOrder !== false;
-            document.getElementById('rule-timeout-minutes').value = appConfig.manualOrderTimeoutMinutes || 30;
             document.getElementById('rule-activation-fee').value = appConfig.activationFee !== undefined ? appConfig.activationFee : 10;
             document.getElementById('rule-referral-bonus').value = appConfig.referralBonus !== undefined ? appConfig.referralBonus : 10;
+            document.getElementById('rule-allow-manual').checked = appConfig.allowManualOrders !== false;
+            document.getElementById('rule-timeout-minutes').value = appConfig.manualOrderTimeoutMinutes || 30;
         }
 
         async function saveOrderRulesConfig() {
-            const allowManualOrder = document.getElementById('rule-allow-manual').checked;
-            const timeoutMinutes = parseInt(document.getElementById('rule-timeout-minutes').value) || 30;
-            const actFee = parseFloat(document.getElementById('rule-activation-fee').value) || 10;
-            const refBonus = parseFloat(document.getElementById('rule-referral-bonus').value) || 10;
+            const activationFee = parseFloat(document.getElementById('rule-activation-fee').value) || 10;
+            const referralBonus = parseFloat(document.getElementById('rule-referral-bonus').value) || 10;
+            const allowManual = document.getElementById('rule-allow-manual').checked;
+            const timeout = parseInt(document.getElementById('rule-timeout-minutes').value) || 30;
 
             await setDoc(doc(dbUser, "config", "main"), {
-                allowManualOrder: allowManualOrder,
-                manualOrderTimeoutMinutes: timeoutMinutes,
-                activationFee: actFee,
-                referralBonus: refBonus
+                activationFee: activationFee,
+                referralBonus: referralBonus,
+                allowManualOrders: allowManual,
+                manualOrderTimeoutMinutes: timeout
             }, { merge: true });
 
-            showAlert("Order rules, activation fee and referral settings saved successfully!");
+            showAlert("Order rules and fees saved successfully!");
         }
 
-        // 5. TELEGRAM BOT & SUPPORT CONFIG
+        // 5. BOT & SUPPORT LINKS CONFIG
         async function loadBotAndSupportConfig() {
             await fetchAppConfig();
             document.getElementById('setting-bot-token').value = appConfig.botToken || '';
             document.getElementById('setting-admin-chat-id').value = appConfig.adminChatId || '6954647230';
-            document.getElementById('support-telegram').value = appConfig.telegramSupportUrl || '';
-            document.getElementById('support-whatsapp').value = appConfig.whatsappSupportUrl || '';
-            document.getElementById('support-channel').value = appConfig.telegramChannelUrl || '';
+            document.getElementById('msg-withdraw-success').value = appConfig.msgWithdrawSuccess || '✅ <b>আপনার ৳{amount} উইথড্রয়াল সফল হয়েছে!</b>\nপেমেন্ট মেথড: {method}\nটাকা আপনার অ্যাকাউন্টে পাঠিয়ে দেওয়া হয়েছে। ধন্যবাদ!';
+            document.getElementById('msg-master-approved').value = appConfig.msgMasterApproved || '🎉 <b>আপনার Master Work ট্রেনিং আবেদন অনুমোদিত হয়েছে!</b>\n\nআপনি এখন মিনি অ্যাপ থেকে সরাসরি Master Work টাস্ক সাবমিট করতে পারবেন। আমাদের ট্রেইনার আপনার সাথে খুব শীঘ্রই যোগাযোগ করবেন।';
+            document.getElementById('msg-master-rejected').value = appConfig.msgMasterRejected || '❌ <b>আপনার Master Work ট্রেনিং আবেদনটি বাতিল করা হয়েছে!</b>\n\nআপনি আগামী ২৪ ঘণ্টা পর অ্যাপ থেকে পুনরায় সঠিক তথ্য দিয়ে আবেদন করতে পারবেন।';
+            document.getElementById('support-telegram').value = appConfig.telegramSupportUrl || 'https://t.me/EXPERTearn_team';
+            document.getElementById('support-whatsapp').value = appConfig.whatsappSupportUrl || 'https://wa.me/8801827750260';
+            document.getElementById('support-channel').value = appConfig.telegramChannelUrl || 'https://t.me/EXPERTearn_team';
             document.getElementById('support-bot-username').value = appConfig.botUsername || 'Gmail_HUB7bot';
-
-            document.getElementById('msg-withdraw-success').value = appConfig.msgWithdrawSuccess || `✅ <b>আপনার ৳{amount} উইথড্রয়াল সফল হয়েছে!</b>\nপেমেন্ট মেথড: {method}\nটাকা আপনার অ্যাকাউন্টে পাঠিয়ে দেওয়া হয়েছে। ধন্যবাদ!`;
-            document.getElementById('msg-master-approved').value = appConfig.msgMasterApproved || `🎉 <b>আপনার Master Work ট্রেনিং আবেদন অনুমোদিত হয়েছে!</b>\n\nআপনি এখন মিনি অ্যাপ থেকে সরাসরি Master Work টাস্ক সাবমিট করতে পারবেন। আমাদের ট্রেইনার আপনার সাথে যোগাযোগ করবেন।`;
-            document.getElementById('msg-master-rejected').value = appConfig.msgMasterRejected || `❌ <b>আপনার Master Work ট্রেনিং আবেদনটি বাতিল করা হয়েছে!</b>\n\nআপনি আগামী ২৪ ঘণ্টা পর অ্যাপ থেকে পুনরায় সঠিক তথ্য দিয়ে আবেদন করতে পারবেন।`;
         }
 
         async function saveBotAndSupportConfig() {
             const botToken = document.getElementById('setting-bot-token').value.trim();
-            const adminId = document.getElementById('setting-admin-chat-id').value.trim();
+            const adminChatId = document.getElementById('setting-admin-chat-id').value.trim();
+            const msgWithdraw = document.getElementById('msg-withdraw-success').value.trim();
+            const msgMasterApp = document.getElementById('msg-master-approved').value.trim();
+            const msgMasterRej = document.getElementById('msg-master-rejected').value.trim();
             const tgSupport = document.getElementById('support-telegram').value.trim();
             const waSupport = document.getElementById('support-whatsapp').value.trim();
             const tgChannel = document.getElementById('support-channel').value.trim();
-            const botUser = document.getElementById('support-bot-username').value.trim() || 'Gmail_HUB7bot';
-
-            const msgWithdraw = document.getElementById('msg-withdraw-success').value.trim();
-            const msgMApproved = document.getElementById('msg-master-approved').value.trim();
-            const msgMRejected = document.getElementById('msg-master-rejected').value.trim();
+            const botUser = document.getElementById('support-bot-username').value.trim().replace('@', '');
 
             await setDoc(doc(dbUser, "config", "main"), {
                 botToken: botToken,
-                adminChatId: adminId,
+                adminChatId: adminChatId,
+                msgWithdrawSuccess: msgWithdraw,
+                msgMasterApproved: msgMasterApp,
+                msgMasterRejected: msgMasterRej,
                 telegramSupportUrl: tgSupport,
                 whatsappSupportUrl: waSupport,
                 telegramChannelUrl: tgChannel,
-                botUsername: botUser,
-                msgWithdrawSuccess: msgWithdraw,
-                msgMasterApproved: msgMApproved,
-                msgMasterRejected: msgMRejected
+                botUsername: botUser
             }, { merge: true });
 
-            showAlert("Telegram Bot, Support links and message templates saved successfully!");
+            showAlert("Telegram bot & support settings saved successfully!");
         }
 
-        // --- UTILITY MODALS ---
+        // ================= ALERT & CONFIRM HELPERS =================
         function showAlert(message) {
             document.getElementById('alert-message').textContent = message;
             document.getElementById('custom-alert').classList.remove('hidden');
         }
 
         function showConfirm(message, onConfirm) {
-            const confirmModal = document.getElementById('custom-confirm');
             document.getElementById('confirm-message').textContent = message;
+            const confirmModal = document.getElementById('custom-confirm');
             confirmModal.classList.remove('hidden');
+
             const okBtn = document.getElementById('confirm-ok-btn');
             const cancelBtn = document.getElementById('confirm-cancel-btn');
-            const okListener = () => { onConfirm(); cleanup(); };
-            const cancelListener = () => cleanup();
-            function cleanup() {
-                confirmModal.classList.add('hidden');
-                okBtn.removeEventListener('click', okListener);
-                cancelBtn.removeEventListener('click', cancelListener);
-            }
-            okBtn.addEventListener('click', okListener, { once: true });
-            cancelBtn.addEventListener('click', cancelListener, { once: true });
-        }
 
-        // Global functions attachment
-        window.loadStockOverview = loadStockOverview;
-        window.toggleBlockUser = toggleBlockUser;
-        window.openBalanceModal = openBalanceModal;
-        window.handleDepositAction = handleDepositAction;
-        window.handleReplaceAction = handleReplaceAction;
-        window.deleteSingleStock = deleteSingleStock;
-        window.copyAllUnsold = copyAllUnsold;
-        window.deleteAllUnsold = deleteAllUnsold;
-        window.loadAddStockPage = loadAddStockPage;
+            const cleanup = () => {
+                confirmModal.classList.add('hidden');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            okBtn.onclick = () => {
+                cleanup();
+                onConfirm();
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+            };
+        }
     </script>
 </body>
 </html>
