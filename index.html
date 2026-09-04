@@ -87,6 +87,10 @@
                         <span id="nav-pending-deposits" class="ml-2 bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
                     </a>
 
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="redeem-codes-page">
+                        <i data-lucide="gift" class="inline-block w-4 h-4 mr-3 text-amber-400"></i>Redeem Codes (রিডিম কোড)
+                    </a>
+
                     <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="manual-orders-page">
                         <i data-lucide="clock" class="inline-block w-4 h-4 mr-3 text-orange-400"></i>Manual Orders
                         <span id="nav-pending-manual" class="ml-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
@@ -113,7 +117,8 @@
                     <!-- SECTION 2: WORK & TASKS -->
                     <div class="sidebar-heading mt-3">Work & Tasks Control</div>
                     <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-sell-services-page"><i data-lucide="badge-dollar-sign" class="inline-block w-4 h-4 mr-3 text-emerald-400"></i>Account Sell Services (Gmail/FB)</a>
-                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-work-system-page"><i data-lucide="toggle-right" class="inline-block w-4 h-4 mr-3 text-amber-400"></i>Work Jobs & Control</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-master-tasks-page"><i data-lucide="layers" class="inline-block w-4 h-4 mr-3 text-amber-400"></i>Master Assigned Tasks (Approved)</a>
+                    <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-work-system-page"><i data-lucide="toggle-right" class="inline-block w-4 h-4 mr-3 text-indigo-400"></i>Work Jobs & Control</a>
                     <a href="#" class="nav-link block py-2.5 px-5 text-xs font-semibold" data-page="set-tasks-page"><i data-lucide="check-square" class="inline-block w-4 h-4 mr-3 text-emerald-400"></i>Tasks (Join, Visit, Bot Keys)</a>
 
                     <!-- SECTION 3: INVENTORY -->
@@ -218,6 +223,25 @@
                     </div>
                 </div>
 
+                <!-- 3.1 REDEEM CODES PAGE -->
+                <div id="redeem-codes-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Redeem Codes (রিডিম কোড ব্যবস্থাপনা)</h1>
+                            <p class="text-xs text-gray-500">ফায়ারবেস থেকে সরাসরি রিডিম কোড তৈরি, চালু/বন্ধ এবং মুছে ফেলুন</p>
+                        </div>
+                        <button onclick="openCreateRedeemModal()" class="btn btn-primary text-xs shadow-md">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Create Redeem Code
+                        </button>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
+                        <table>
+                            <thead><tr><th>Code</th><th>Amount</th><th>Usage Status</th><th>Active?</th><th>Created</th><th>Actions</th></tr></thead>
+                            <tbody id="redeem-codes-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- 4. MANUAL ORDERS PAGE -->
                 <div id="manual-orders-page" class="page">
                     <div class="flex items-center justify-between mb-6">
@@ -235,18 +259,18 @@
                     </div>
                 </div>
 
-                <!-- 5. MASTER TRAINING APPLICATIONS PAGE -->
+                <!-- 5. MASTER TRAINING APPLICATIONS PAGE (HIGHLY DETAILED) -->
                 <div id="master-apps-page" class="page">
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Master Work ট্রেনিং আবেদনসমূহ</h1>
-                            <p class="text-xs text-gray-500">অ্যাপ্রুভ করলে ইউজারের কাছে টেলিগ্রামে মেসেজ যাবে। রিজেক্ট করলে ইউজার ২৪ ঘণ্টা পর পুনরায় আবেদন করতে পারবেন।</p>
+                            <p class="text-xs text-gray-500">অ্যাপ্রুভ করলে ব্যবহারকারী স্পেশাল মাস্টার পোর্টালে কাজ সাবমিট করতে পারবেন এবং টেলিগ্রামে কনফার্মেশন পাবেন।</p>
                         </div>
                         <span class="text-xs bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-bold">Live Training Review</span>
                     </div>
                     <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
                         <table>
-                            <thead><tr><th>User Info</th><th>Contact Method</th><th>Free Time & Experience</th><th>Expectations</th><th>Date</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Applicant Info</th><th>Contact Method</th><th>Device & Internet</th><th>Free Time & Slot</th><th>Experience & Notes</th><th>Date</th><th>Actions</th></tr></thead>
                             <tbody id="master-apps-table-body"></tbody>
                         </table>
                     </div>
@@ -317,7 +341,7 @@
                 <div id="set-sell-services-page" class="page">
                     <div class="flex items-center justify-between mb-6">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Account Sell Services (Gmail, FB, etc.)</h1>
+                            <h1 class="text-2xl font-bold text-gray-800">Account Sell Services (VIP 0)</h1>
                             <p class="text-xs text-gray-500">ইউজার অ্যাপের অ্যাকাউন্ট সেল পেজের রেট পরিবর্তন করুন, কাজ অন/অফ রাখুন অথবা নতুন কাজের বিভাগ যোগ করুন</p>
                         </div>
                         <div class="flex gap-2">
@@ -326,6 +350,21 @@
                         </div>
                     </div>
                     <div id="sell-services-container" class="space-y-4"></div>
+                </div>
+
+                <!-- 10.1 MASTER ASSIGNED TASKS MANAGEMENT (NEW) -->
+                <div id="set-master-tasks-page" class="page">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Master Assigned Tasks (Approved Worker Portal)</h1>
+                            <p class="text-xs text-gray-500">মাস্টার ট্রেনিং অনুমোদিত ব্যবহারকারীদের জন্য স্পেশাল টাস্ক ও রেট নির্ধারণ করুন</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="add-master-task-btn" class="btn bg-gray-800 text-white text-xs">+ Add Master Task</button>
+                            <button id="save-master-tasks-btn" class="btn btn-primary text-xs shadow-md">Save Master Tasks</button>
+                        </div>
+                    </div>
+                    <div id="master-tasks-container" class="space-y-4"></div>
                 </div>
 
                 <!-- 11. WORK SYSTEM & JOBS MANAGEMENT -->
@@ -490,17 +529,17 @@
                     </div>
                 </div>
 
-                <!-- 19. ORDER RULES & ACTIVATION SETTINGS PAGE -->
+                <!-- 19. ORDER RULES & ACTIVATION SETTINGS PAGE (ENHANCED) -->
                 <div id="set-rules-page" class="page">
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Order Rules, Fees & Activation</h1>
-                            <p class="text-xs text-gray-500">স্টক আউট প্রি-অর্ডার, অ্যাকাউন্ট অ্যাক্টিভেশন ফি এবং রেফারেল বোনাস নির্ধারণ</p>
+                            <p class="text-xs text-gray-500">স্টক আউট প্রি-অর্ডার, অ্যাকাউন্ট অ্যাক্টিভেশন ফি, মাস্টার ওয়ার্ক ও ভিআইপি আনলক ফি নির্ধারণ</p>
                         </div>
                         <button id="save-rules-btn" class="btn btn-primary text-xs shadow-md">Save Settings</button>
                     </div>
 
-                    <div class="stat-card p-6 max-w-2xl space-y-6">
+                    <div class="stat-card p-6 max-w-3xl space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-4 bg-blue-50 rounded-2xl border border-blue-200">
                                 <label class="block text-xs font-black text-blue-950 mb-1">অ্যাকাউন্ট অ্যাক্টিভেশন ফি (BDT)</label>
@@ -512,6 +551,18 @@
                                 <label class="block text-xs font-black text-emerald-950 mb-1">রেফারেল বোনাস (BDT)</label>
                                 <p class="text-[11px] text-emerald-800 mb-2">বন্ধু অ্যাকাউন্ট অ্যাক্টিভ করলে ইনভাইটার কত টাকা পাবে</p>
                                 <input type="number" step="1" id="rule-referral-bonus" class="w-full p-2.5 border rounded-xl text-sm font-bold text-emerald-700 bg-white" placeholder="10">
+                            </div>
+
+                            <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                                <label class="block text-xs font-black text-amber-950 mb-1">Master Work আনলক ফি (BDT)</label>
+                                <p class="text-[11px] text-amber-800 mb-2">মাস্টার ট্রেনিং আনলক করতে ইউজার কত টাকা পেমেন্ট করবে</p>
+                                <input type="number" step="1" id="rule-master-unlock-fee" class="w-full p-2.5 border rounded-xl text-sm font-bold text-amber-700 bg-white" placeholder="50">
+                            </div>
+
+                            <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200">
+                                <label class="block text-xs font-black text-purple-950 mb-1">VIP 0 আনলক ফি (BDT)</label>
+                                <p class="text-[11px] text-purple-800 mb-2">VIP 0 আনলক করার ফি (ফ্রি রাখতে 0 দিন)</p>
+                                <input type="number" step="1" id="rule-vip0-unlock-fee" class="w-full p-2.5 border rounded-xl text-sm font-bold text-purple-700 bg-white" placeholder="0">
                             </div>
                         </div>
 
@@ -587,7 +638,7 @@
                                 <input type="url" id="support-whatsapp" class="w-full p-2.5 border rounded-xl text-sm" placeholder="https://wa.me/8801827750260">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Telegram Channel URL</label>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Telegram Channel URL (Master Work)</label>
                                 <input type="url" id="support-channel" class="w-full p-2.5 border rounded-xl text-sm" placeholder="https://t.me/EXPERTearn_team">
                             </div>
                             <div>
@@ -599,6 +650,34 @@
                 </div>
 
             </main>
+        </div>
+    </div>
+
+    <!-- CREATE REDEEM CODE MODAL -->
+    <div id="admin-redeem-modal" class="modal-overlay hidden">
+        <div class="modal-content !w-[420px]">
+            <h2 class="text-lg font-bold mb-3 text-gray-800 flex items-center gap-2">
+                <i data-lucide="gift" class="w-5 h-5 text-amber-500"></i>
+                <span>Create New Redeem Code</span>
+            </h2>
+            <div class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">রিডিম কোড (Unique Code)</label>
+                    <input id="modal-redeem-code" type="text" placeholder="যেমন: BONUS50" class="w-full p-2.5 border rounded-xl text-xs font-mono font-bold uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">টাকার পরিমাণ (BDT Amount)</label>
+                    <input id="modal-redeem-amount" type="number" step="0.5" placeholder="যেমন: 50" class="w-full p-2.5 border rounded-xl text-xs font-bold text-emerald-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">সর্বোচ্চ ব্যবহারকারীর সংখ্যা (Max Uses)</label>
+                    <input id="modal-redeem-max-uses" type="number" value="100" placeholder="100" class="w-full p-2.5 border rounded-xl text-xs font-bold">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2 border-t">
+                    <button type="button" onclick="closeCreateRedeemModal()" class="btn bg-gray-200 text-gray-700 text-xs">Cancel</button>
+                    <button type="button" id="btn-create-redeem-submit" onclick="executeCreateRedeemCode()" class="btn btn-primary text-xs">Save to Firebase</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -631,7 +710,7 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Master Work Unlocked?</label>
                         <select id="user-master-select" class="w-full p-2.5 border rounded-xl text-xs font-bold text-amber-700 bg-amber-50">
-                            <option value="true">Unlocked (50৳ Paid)</option>
+                            <option value="true">Unlocked (Paid)</option>
                             <option value="false">Locked</option>
                         </select>
                     </div>
@@ -668,7 +747,7 @@
         // 1. AUTHORIZED ADMIN UID
         const TARGET_ADMIN_UID = "JeVQXKMTLEWo5O86RfXKLmk2bi43";
 
-        // 2. PRIMARY FIREBASE CONFIG (Auth, Users, Balances, Config, Deposits, Withdrawals)
+        // 2. PRIMARY FIREBASE CONFIG (Auth, Users, Balances, Config, Deposits, Withdrawals, Redeem Codes)
         const primaryFirebaseConfig = {
             apiKey: "AIzaSyC_Qj_G_FOrlSehcj6qjdYB8x_G-yIyWnU",
             authDomain: "hub-54f3d.firebaseapp.com",
@@ -678,7 +757,7 @@
             appId: "1:379028334299:web:20b8340f8115cd10de0efe"
         };
 
-        // 3. SECONDARY FIREBASE CONFIG (Shop Stock, Purchases, Work Submissions & Accounts)
+        // 3. SECONDARY FIREBASE CONFIG (Shop Stock, Purchases, Work Submissions & Master Tasks)
         const secondaryFirebaseConfig = {
             apiKey: "AIzaSyCagqvWu9t5Qp1IALosaP3-9jN52fhxQ2M",
             authDomain: "saidul4x-78b68.firebaseapp.com",
@@ -774,6 +853,7 @@
                 'dashboard-page': loadDashboardData,
                 'withdrawals-page': loadWithdrawals,
                 'deposits-page': loadDeposits,
+                'redeem-codes-page': loadRedeemCodes,
                 'manual-orders-page': loadManualOrders,
                 'master-apps-page': loadMasterApplications,
                 'work-submissions-page': loadWorkSubmissions,
@@ -781,6 +861,7 @@
                 'users-page': () => loadUsers(),
                 'purchases-page': loadMailPurchases,
                 'set-sell-services-page': loadSellServicesConfig,
+                'set-master-tasks-page': loadMasterAssignedTasksConfig,
                 'set-work-system-page': loadWorkJobsConfig,
                 'set-tasks-page': loadDynamicTasksConfig,
                 'stock-page': loadAddStockPage,
@@ -861,6 +942,7 @@
             document.getElementById('save-tasks-btn').addEventListener('click', saveDynamicTasksConfig);
             document.getElementById('save-work-settings-btn').addEventListener('click', saveWorkJobsConfig);
             document.getElementById('save-sell-services-btn').addEventListener('click', saveSellServicesConfig);
+            document.getElementById('save-master-tasks-btn').addEventListener('click', saveMasterAssignedTasksConfig);
 
             document.getElementById('add-mail-type-btn').addEventListener('click', () => addMailTypeToUI());
             document.getElementById('add-payment-method-btn').addEventListener('click', () => addPaymentMethodToUI());
@@ -868,6 +950,7 @@
             document.getElementById('add-task-btn').addEventListener('click', () => addTaskToUI());
             document.getElementById('add-job-btn').addEventListener('click', () => addJobToUI());
             document.getElementById('add-sell-service-btn').addEventListener('click', () => addSellServiceToUI());
+            document.getElementById('add-master-task-btn').addEventListener('click', () => addMasterTaskToUI());
 
             document.getElementById('add-mails-btn').addEventListener('click', handleAddMails);
             document.getElementById('balance-modal-cancel').addEventListener('click', () => document.getElementById('balance-modal').classList.add('hidden'));
@@ -1130,6 +1213,126 @@
             });
         };
 
+        // --- REDEEM CODES MANAGEMENT (Primary DB: dbUser) ---
+        async function loadRedeemCodes() {
+            const tableBody = document.getElementById('redeem-codes-table-body');
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading redeem codes...</td></tr>`;
+
+            try {
+                const snap = await getDocs(collection(dbUser, "redeem_codes"));
+                if (snap.empty) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">কোনো রিডিম কোড পাওয়া যায়নি।</td></tr>`;
+                    return;
+                }
+
+                const codes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                tableBody.innerHTML = codes.map(c => {
+                    const isActive = c.isActive !== false;
+                    const usedCount = c.usedCount || (Array.isArray(c.usedBy) ? c.usedBy.length : 0);
+                    const maxUses = c.maxUses || 999999;
+                    const dateStr = c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-GB') : 'N/A';
+
+                    return `<tr>
+                        <td>
+                            <span class="font-mono font-black text-sm text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 select-all">${c.code || c.id}</span>
+                        </td>
+                        <td class="font-black text-emerald-600 text-xs">৳${parseFloat(c.amount || 0).toFixed(2)}</td>
+                        <td>
+                            <span class="text-xs font-bold text-gray-700 font-mono">${usedCount}</span>
+                            <span class="text-[11px] text-gray-400">/ ${maxUses} users</span>
+                        </td>
+                        <td>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+                                ${isActive ? 'Active' : 'Disabled'}
+                            </span>
+                        </td>
+                        <td class="text-xs text-gray-500">${dateStr}</td>
+                        <td class="space-x-1.5 whitespace-nowrap">
+                            <button class="btn text-xs ${isActive ? 'btn-warning' : 'btn-success'}" onclick="window.toggleRedeemCodeActive('${c.id}', ${isActive})">
+                                ${isActive ? 'Disable' : 'Enable'}
+                            </button>
+                            <button class="btn btn-danger text-xs" onclick="window.deleteRedeemCode('${c.id}')">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                            </button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                lucide.createIcons();
+            } catch(e) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs text-red-500">Error: ${e.message}</td></tr>`;
+            }
+        }
+
+        window.openCreateRedeemModal = function() {
+            document.getElementById('modal-redeem-code').value = '';
+            document.getElementById('modal-redeem-amount').value = '';
+            document.getElementById('modal-redeem-max-uses').value = '100';
+            document.getElementById('admin-redeem-modal').classList.remove('hidden');
+        };
+
+        window.closeCreateRedeemModal = function() {
+            document.getElementById('admin-redeem-modal').classList.add('hidden');
+        };
+
+        window.executeCreateRedeemCode = async function() {
+            const code = document.getElementById('modal-redeem-code').value.trim().toUpperCase();
+            const amount = parseFloat(document.getElementById('modal-redeem-amount').value || 0);
+            const maxUses = parseInt(document.getElementById('modal-redeem-max-uses').value || 100);
+
+            if (!code || amount <= 0) {
+                return showAlert("অনুগ্রহ করে সঠিক রিডিম কোড ও টাকার পরিমাণ উল্লেখ করুন!");
+            }
+
+            const btn = document.getElementById('btn-create-redeem-submit');
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+
+            try {
+                const codeRef = doc(dbUser, "redeem_codes", code);
+                await setDoc(codeRef, {
+                    code: code,
+                    amount: amount,
+                    maxUses: maxUses,
+                    usedCount: 0,
+                    usedBy: [],
+                    isActive: true,
+                    createdAt: serverTimestamp()
+                });
+
+                showAlert(`🎉 রিডিম কোড '${code}' সফলভাবে ফায়ারবেসে তৈরি হয়েছে!`);
+                closeCreateRedeemModal();
+                loadRedeemCodes();
+            } catch(e) {
+                showAlert("কোড তৈরিতে ত্রুটি: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Save to Firebase";
+            }
+        };
+
+        window.toggleRedeemCodeActive = async function(codeId, currentStatus) {
+            try {
+                await updateDoc(doc(dbUser, "redeem_codes", codeId), {
+                    isActive: !currentStatus
+                });
+                loadRedeemCodes();
+            } catch(e) {
+                showAlert(e.message);
+            }
+        };
+
+        window.deleteRedeemCode = function(codeId) {
+            showConfirm(`আপনি কি নিশ্চিত যে '${codeId}' কোডটি মুছে ফেলতে চান?`, async () => {
+                try {
+                    await deleteDoc(doc(dbUser, "redeem_codes", codeId));
+                    showAlert("রিডিম কোড সফলভাবে মুছে ফেলা হয়েছে।");
+                    loadRedeemCodes();
+                } catch(e) {
+                    showAlert(e.message);
+                }
+            });
+        };
+
         // --- MANUAL ORDERS (Secondary DB: dbShop) ---
         function loadManualOrders() {
             const tableBody = document.getElementById('manual-orders-table-body');
@@ -1252,37 +1455,45 @@
         // --- MASTER WORK APPLICATIONS (Secondary DB: dbWork) ---
         function loadMasterApplications() {
             const tableBody = document.getElementById('master-apps-table-body');
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading applications...</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading applications...</td></tr>`;
             const q = query(collection(dbWork, "master_training_applications"), where("status", "==", "pending"), orderBy("submittedAt", "desc"));
 
             masterAppUnsubscribe = onSnapshot(q, (snapshot) => {
                 if (snapshot.empty) {
-                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">কোনো পেন্ডিং মাস্টার ট্রেনিং আবেদন নেই।</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500 font-semibold text-xs">কোনো পেন্ডিং মাস্টার ট্রেনিং আবেদন নেই।</td></tr>`;
                     return;
                 }
 
                 tableBody.innerHTML = snapshot.docs.map(docSnap => {
                     const app = docSnap.data();
                     const date = app.submittedAt?.toDate().toLocaleString('en-GB') || 'Just now';
+                    const name = app.fullName || app.telegramName || 'User';
 
                     return `<tr>
                         <td>
-                            <p class="font-bold text-gray-800 text-xs">${app.telegramName || 'User'}</p>
+                            <p class="font-bold text-gray-800 text-xs">${name}</p>
                             <p class="text-[11px] font-mono text-gray-500">ID: ${app.userId}</p>
                             <p class="text-[10px] text-blue-600 font-semibold">${app.telegramUsername ? '@' + app.telegramUsername : ''}</p>
                         </td>
                         <td>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">${app.contactPlatform}</span>
-                            <p class="font-mono text-xs font-bold text-gray-800 mt-1 select-all">${app.contactNumber}</p>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">${app.contactPlatform || 'Contact'}</span>
+                            <p class="font-mono text-xs font-bold text-gray-800 mt-1 select-all">${app.contactNumber || 'N/A'}</p>
                         </td>
                         <td class="text-xs">
-                            <p class="font-semibold text-gray-700">${app.preferredTime}</p>
-                            <p class="text-[10px] text-gray-400">অভিজ্ঞতা: ${app.experience}</p>
+                            <p class="font-bold text-slate-800">${app.device || 'Mobile'}</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Net: ${app.internet || 'Broadband'}</p>
                         </td>
-                        <td class="text-xs text-gray-600 max-w-xs">${app.expectations || 'N/A'}</td>
+                        <td class="text-xs">
+                            <p class="font-semibold text-indigo-700">${app.preferredTime || 'Anytime'}</p>
+                            <p class="text-[10px] text-slate-400">সময়: ${app.dailyHours || '2-3h'}/day</p>
+                        </td>
+                        <td class="text-xs text-gray-600 max-w-xs">
+                            <p class="font-bold text-slate-700">অভিজ্ঞতা: ${app.experience || 'New'}</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-2">${app.expectations || 'None'}</p>
+                        </td>
                         <td class="text-xs text-gray-500">${date}</td>
                         <td class="space-x-1.5 whitespace-nowrap">
-                            <button class="btn btn-success text-xs" onclick="window.handleMasterAppStatus('${docSnap.id}', '${app.userId}', 'approved')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve Training</button>
+                            <button class="btn btn-success text-xs" onclick="window.handleMasterAppStatus('${docSnap.id}', '${app.userId}', 'approved')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve</button>
                             <button class="btn btn-danger text-xs" onclick="window.handleMasterAppStatus('${docSnap.id}', '${app.userId}', 'rejected')">Reject</button>
                         </td>
                     </tr>`;
@@ -1353,7 +1564,7 @@
                         <td class="font-black text-emerald-600 text-xs">৳${parseFloat(sub.reward || 0).toFixed(2)}</td>
                         <td class="max-w-xs">
                             <div class="bg-gray-50 p-2 rounded-lg border font-mono text-[11px] text-gray-700 break-all select-all">
-                                ${sub.proof}
+                                ${sub.proof || sub.accountIdentifier || 'N/A'}
                             </div>
                         </td>
                         <td class="text-xs text-gray-500">${date}</td>
@@ -1581,7 +1792,7 @@
             }).join('');
         }
 
-        // ================= ACCOUNT SELL SERVICES CONFIG (Secondary DB: dbWork) =================
+        // ================= ACCOUNT SELL SERVICES CONFIG (VIP 0) =================
         async function loadSellServicesConfig() {
             const container = document.getElementById('sell-services-container');
             container.innerHTML = `<p class="text-xs text-gray-500">Loading sell services...</p>`;
@@ -1601,9 +1812,7 @@
                             icon: "mail",
                             rate: 25.00,
                             rateDisplay: "৳২০.০০ - ৳৫০.০০",
-                            isActive: true,
-                            placeholder: "Email | Password | Recovery Mail (যদি থাকে)",
-                            formatHint: "Email | Password"
+                            isActive: true
                         },
                         {
                             id: "facebook",
@@ -1612,9 +1821,7 @@
                             icon: "facebook",
                             rate: 25.00,
                             rateDisplay: "৳২৫.০০ / আইডি",
-                            isActive: true,
-                            placeholder: "UID / Profile Link | Password | 2FA Code (যদি থাকে)",
-                            formatHint: "UID/Number | Password"
+                            isActive: true
                         }
                     ];
                 }
@@ -1646,7 +1853,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Estimated Rate (BDT - ইউজারের রিওয়ার্ড)</label>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Rate (BDT - ইউজারের রিওয়ার্ড)</label>
                         <input type="number" step="0.5" placeholder="25.00" class="p-2 border rounded-lg w-full text-xs font-bold text-emerald-600" data-srv="rate" value="${srv.rate || 25.00}" required>
                     </div>
 
@@ -1663,16 +1870,6 @@
                     <div>
                         <label class="block text-[11px] font-bold text-gray-600 mb-1">Lucide Icon</label>
                         <input type="text" placeholder="mail, facebook" class="p-2 border rounded-lg w-full text-xs font-mono" data-srv="icon" value="${srv.icon || 'shield-check'}">
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Format Sample Hint</label>
-                        <input type="text" placeholder="Email | Password" class="p-2 border rounded-lg w-full text-xs" data-srv="formatHint" value="${srv.formatHint || 'Email | Password'}">
-                    </div>
-
-                    <div class="md:col-span-4">
-                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Textarea Placeholder</label>
-                        <input type="text" placeholder="Email | Password | Recovery Mail" class="p-2 border rounded-lg w-full text-xs" data-srv="placeholder" value="${srv.placeholder || ''}">
                     </div>
                 </div>
 
@@ -1706,7 +1903,6 @@
             });
 
             try {
-                // Secondary Database (dbWork)
                 const batch = writeBatch(dbWork);
                 const existingSnap = await getDocs(collection(dbWork, "sell_services"));
                 existingSnap.docs.forEach(d => batch.delete(d.ref));
@@ -1717,7 +1913,6 @@
 
                 await batch.commit();
 
-                // Primary Database Configuration (dbUser)
                 await setDoc(doc(dbUser, "config", "main"), {
                     sellServices: newServices
                 }, { merge: true });
@@ -1728,7 +1923,138 @@
             }
         }
 
-        // ================= WORK JOBS MANAGEMENT (Secondary DB: dbWork) =================
+        // ================= MASTER ASSIGNED TASKS CONFIG (Approved Portal) =================
+        async function loadMasterAssignedTasksConfig() {
+            const container = document.getElementById('master-tasks-container');
+            container.innerHTML = `<p class="text-xs text-gray-500">Loading master tasks...</p>`;
+
+            try {
+                let masterTasksList = [];
+                const snap = await getDocs(collection(dbWork, "master_assigned_tasks"));
+                if (!snap.empty) {
+                    masterTasksList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } else {
+                    await fetchAppConfig();
+                    masterTasksList = appConfig.masterServices || [
+                        {
+                            id: "master_gmail_2fa",
+                            name: "Master 2FA Gmail Batch",
+                            category: "Master Gmail",
+                            icon: "mail-check",
+                            rate: 120.00,
+                            rateDisplay: "৳১২০.০০ / আইডি",
+                            isActive: true
+                        },
+                        {
+                            id: "master_outlook",
+                            name: "Master Outlook / Hotmail",
+                            category: "Hotmail",
+                            icon: "mail",
+                            rate: 100.00,
+                            rateDisplay: "৳১০০.০০ / আইডি",
+                            isActive: true
+                        }
+                    ];
+                }
+
+                container.innerHTML = '';
+                masterTasksList.forEach(task => addMasterTaskToUI(task));
+                lucide.createIcons();
+            } catch(e) {
+                container.innerHTML = `<p class="text-xs text-red-500">Error: ${e.message}</p>`;
+            }
+        }
+
+        function addMasterTaskToUI(task = {}) {
+            const container = document.getElementById('master-tasks-container');
+            const card = document.createElement('div');
+            card.className = 'p-5 border rounded-2xl bg-white master-task-card space-y-3 relative shadow-sm';
+            const isEnabled = task.isActive !== false;
+
+            card.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Task ID</label>
+                        <input type="text" placeholder="master_gmail_2fa" class="p-2 border rounded-lg w-full text-xs font-mono font-bold" data-mtask="id" value="${task.id || ''}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Task Title</label>
+                        <input type="text" placeholder="Master 2FA Gmail Batch" class="p-2 border rounded-lg w-full text-xs font-bold text-gray-800" data-mtask="name" value="${task.name || ''}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Reward Rate (BDT)</label>
+                        <input type="number" step="1" placeholder="120.00" class="p-2 border rounded-lg w-full text-xs font-bold text-emerald-600" data-mtask="rate" value="${task.rate || 120.00}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Rate Display Text</label>
+                        <input type="text" placeholder="৳১২০.০০ / আইডি" class="p-2 border rounded-lg w-full text-xs font-bold text-amber-600" data-mtask="rateDisplay" value="${task.rateDisplay || ''}">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Category</label>
+                        <input type="text" placeholder="Master Gmail" class="p-2 border rounded-lg w-full text-xs" data-mtask="category" value="${task.category || 'Master Work'}">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Icon</label>
+                        <input type="text" placeholder="mail-check, crown" class="p-2 border rounded-lg w-full text-xs font-mono" data-mtask="icon" value="${task.icon || 'shield-check'}">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 text-amber-600 rounded" data-mtask="isActive" ${isEnabled ? 'checked' : ''}>
+                        <span class="text-xs font-bold text-gray-700">মাস্টার পোর্টালে এই টাস্ক সক্রিয় রাখুন (Active)</span>
+                    </label>
+                    <button class="btn btn-danger text-xs py-1 px-3" onclick="this.closest('.master-task-card').remove()">Remove Task</button>
+                </div>
+            `;
+            container.appendChild(card);
+            lucide.createIcons();
+        }
+
+        async function saveMasterAssignedTasksConfig() {
+            const newMasterTasks = [];
+            document.querySelectorAll('.master-task-card').forEach(card => {
+                const t = {};
+                card.querySelectorAll('[data-mtask]').forEach(input => {
+                    const field = input.dataset.mtask;
+                    if (input.type === 'checkbox') {
+                        t[field] = input.checked;
+                    } else if (field === 'rate') {
+                        t[field] = parseFloat(input.value) || 0;
+                    } else {
+                        t[field] = input.value.trim();
+                    }
+                });
+                if (t.id && t.name) newMasterTasks.push(t);
+            });
+
+            try {
+                const batch = writeBatch(dbWork);
+                const existingSnap = await getDocs(collection(dbWork, "master_assigned_tasks"));
+                existingSnap.docs.forEach(d => batch.delete(d.ref));
+
+                newMasterTasks.forEach(task => {
+                    batch.set(doc(dbWork, "master_assigned_tasks", task.id), task);
+                });
+
+                await batch.commit();
+
+                await setDoc(doc(dbUser, "config", "main"), {
+                    masterServices: newMasterTasks
+                }, { merge: true });
+
+                showAlert("Master Assigned Tasks সফলভাবে সংরক্ষিত হয়েছে!");
+            } catch(e) {
+                showAlert("সেভ করতে সমস্যা হয়েছে: " + e.message);
+            }
+        }
+
+        // ================= WORK JOBS MANAGEMENT =================
         async function loadWorkJobsConfig() {
             await fetchAppConfig();
             document.getElementById('toggle-global-work').checked = appConfig.workSystemEnabled !== false;
@@ -1845,7 +2171,6 @@
             });
 
             try {
-                // Secondary Database (dbWork)
                 const batch = writeBatch(dbWork);
                 const existingSnap = await getDocs(collection(dbWork, "available_jobs"));
                 existingSnap.docs.forEach(d => batch.delete(d.ref));
@@ -1857,7 +2182,6 @@
 
                 await batch.commit();
 
-                // Primary Database Configuration (dbUser)
                 await setDoc(doc(dbUser, "config", "main"), {
                     workSystemEnabled: isGlobalWorkEnabled,
                     availableJobs: newJobs
@@ -1869,7 +2193,7 @@
             }
         }
 
-        // ================= DYNAMIC TASKS CONFIG (Secondary DB: dbWork) =================
+        // ================= DYNAMIC TASKS CONFIG =================
         async function loadDynamicTasksConfig() {
             const tasksContainer = document.getElementById('tasks-container');
             tasksContainer.innerHTML = `<p class="text-xs text-gray-500">Loading tasks...</p>`;
@@ -1998,7 +2322,6 @@
             });
 
             try {
-                // Secondary Database (dbWork)
                 const batch = writeBatch(dbWork);
                 const existingSnap = await getDocs(collection(dbWork, "tasks"));
                 existingSnap.docs.forEach(d => batch.delete(d.ref));
@@ -2010,7 +2333,6 @@
 
                 await batch.commit();
 
-                // Store single-use keys in collection for instant lookup
                 for (const task of newTasks) {
                     if (task.type === 'visit_bot' && Array.isArray(task.secretKeys)) {
                         for (const keyStr of task.secretKeys) {
@@ -2025,7 +2347,6 @@
                     }
                 }
 
-                // Primary Database Configuration (dbUser)
                 await setDoc(doc(dbUser, "config", "main"), { tasks: newTasks }, { merge: true });
                 showAlert(`সফলভাবে ${newTasks.length} টি টাস্ক ডাটাবেসে সংরক্ষিত হয়েছে!`);
             } catch(e) {
@@ -2033,7 +2354,7 @@
             }
         }
 
-        // ================= BULK STOCK UPLOAD (Secondary DB: dbShop) =================
+        // ================= BULK STOCK UPLOAD =================
         async function loadAddStockPage() {
             await fetchAppConfig();
             const selectEl = document.getElementById('mail-type-select-add');
@@ -2069,7 +2390,7 @@
             progressBox.classList.remove('hidden');
 
             try {
-                const CHUNK_SIZE = 400; // Under Firestore 500 limit
+                const CHUNK_SIZE = 400; 
                 let totalUploaded = 0;
 
                 for (let i = 0; i < lines.length; i += CHUNK_SIZE) {
@@ -2129,7 +2450,7 @@
             }
         }
 
-        // --- MANAGE STOCK ITEMS (Secondary DB: dbShop) ---
+        // --- MANAGE STOCK ITEMS ---
         async function loadManageMailsPage() {
             await fetchAppConfig();
             const selectEl = document.getElementById('mail-type-select-manage');
@@ -2208,7 +2529,7 @@
             navigator.clipboard.writeText(text).then(() => showAlert(`Copied ${snapshot.size} items to clipboard!`));
         };
 
-        // --- NOTIFICATIONS (Primary DB: dbUser) ---
+        // --- NOTIFICATIONS ---
         async function handleBroadcastNotification() {
             const title = document.getElementById('broadcast-title').value.trim();
             const message = document.getElementById('broadcast-message').value.trim();
@@ -2241,7 +2562,7 @@
             document.getElementById('direct-message').value = '';
         }
 
-        // ================= CONFIG LOADERS & SAVERS (Primary DB: dbUser) =================
+        // ================= CONFIG LOADERS & SAVERS =================
 
         // 1. PRODUCTS CONFIG
         async function loadProductsConfig() {
@@ -2438,11 +2759,13 @@
             showAlert("Payment numbers saved successfully!");
         }
 
-        // 4. ORDER RULES & FEES CONFIG
+        // 4. ORDER RULES & FEES CONFIG (UPDATED WITH UNLOCK FEES)
         async function loadOrderRulesConfig() {
             await fetchAppConfig();
             document.getElementById('rule-activation-fee').value = appConfig.activationFee !== undefined ? appConfig.activationFee : 10;
             document.getElementById('rule-referral-bonus').value = appConfig.referralBonus !== undefined ? appConfig.referralBonus : 10;
+            document.getElementById('rule-master-unlock-fee').value = appConfig.masterUnlockFee !== undefined ? appConfig.masterUnlockFee : 50;
+            document.getElementById('rule-vip0-unlock-fee').value = appConfig.vip0UnlockFee !== undefined ? appConfig.vip0UnlockFee : 0;
             document.getElementById('rule-allow-manual').checked = appConfig.allowManualOrders !== false;
             document.getElementById('rule-timeout-minutes').value = appConfig.manualOrderTimeoutMinutes || 30;
         }
@@ -2450,17 +2773,21 @@
         async function saveOrderRulesConfig() {
             const activationFee = parseFloat(document.getElementById('rule-activation-fee').value) || 10;
             const referralBonus = parseFloat(document.getElementById('rule-referral-bonus').value) || 10;
+            const masterUnlockFee = parseFloat(document.getElementById('rule-master-unlock-fee').value) || 50;
+            const vip0UnlockFee = parseFloat(document.getElementById('rule-vip0-unlock-fee').value) || 0;
             const allowManual = document.getElementById('rule-allow-manual').checked;
             const timeout = parseInt(document.getElementById('rule-timeout-minutes').value) || 30;
 
             await setDoc(doc(dbUser, "config", "main"), {
                 activationFee: activationFee,
                 referralBonus: referralBonus,
+                masterUnlockFee: masterUnlockFee,
+                vip0UnlockFee: vip0UnlockFee,
                 allowManualOrders: allowManual,
                 manualOrderTimeoutMinutes: timeout
             }, { merge: true });
 
-            showAlert("Order rules and fees saved successfully!");
+            showAlert("Rules, Activation and Unlock Fees successfully saved!");
         }
 
         // 5. BOT & SUPPORT LINKS CONFIG
