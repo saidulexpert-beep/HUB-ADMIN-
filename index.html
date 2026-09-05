@@ -35,6 +35,9 @@
         th { background-color: #f8fafc; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 0.70rem; letter-spacing: 0.05em; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
         .modal-content { background-color: white; padding: 1.5rem; border-radius: 1.25rem; max-width: 90%; width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .category-tab-pill { transition: all 0.2s ease; cursor: pointer; }
+        .category-tab-pill.active { background-color: #2563eb !important; color: #ffffff !important; border-color: #1d4ed8 !important; }
+        .category-tab-pill.active span.count-badge { background-color: rgba(255, 255, 255, 0.25) !important; color: #ffffff !important; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -278,12 +281,12 @@
                     </div>
                 </div>
 
-                <!-- 6. WORK SUBMISSIONS PAGE (WITH BULK EXPORT, COPY & BATCH APPROVE/REJECT) -->
+                <!-- 6. WORK SUBMISSIONS PAGE (WITH PURE PENDING EXPORT, CATEGORY FILTER & GMAIL LIST BULK ACTIONS) -->
                 <div id="work-submissions-page" class="page">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Work Submissions (VIP 0 & Master Tasks)</h1>
-                            <p class="text-xs text-gray-500">পেন্ডিং কাজ ক্যাটাগরি অনুসারে আলাদা ডাউনলোড ও বাল্ক ভেরিফাই করুন</p>
+                            <p class="text-xs text-gray-500">ক্যাটাগরি ভিত্তিক পেন্ডিং একাউন্ট এক্সপোর্ট এবং জিমেইল তালিকা আপলোড করে বাল্ক Approve/Reject করুন</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button onclick="loadWorkSubmissions()" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs">
@@ -292,50 +295,61 @@
                         </div>
                     </div>
 
-                    <!-- 6.1 CATEGORY WISE DOWNLOAD & COPY TOOLBAR -->
+                    <!-- 6.1 PURE PENDING CATEGORY EXPORT & LIVE FILTER PILLS -->
                     <div class="stat-card p-4 mb-4 space-y-3">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
                             <span class="text-xs font-black text-gray-700 uppercase flex items-center gap-1.5">
                                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-blue-600"></i>
-                                <span>ক্যাটাগরি ভিত্তিক পেন্ডিং একাউন্ট এক্সপোর্ট:</span>
+                                <span>ক্যাটাগরি ভিত্তিক পেন্ডিং একাউন্ট এক্সপোর্ট ও ভিউ:</span>
                             </span>
-                            <span class="text-[11px] text-gray-400">প্রতিটি ক্যাটাগরি আলাদাভাবে এক্সেল ডাউনলোড ও কপি করতে পারবেন</span>
+                            <span class="text-[11px] text-gray-400">*ক্যাটাগরিতে ক্লিক করলে নিচে শুধু সেই ক্যাটাগরির পেন্ডিং ডাটা দেখা যাবে এবং ডাউনলোড হবে</span>
                         </div>
                         <div id="category-export-pill-container" class="flex flex-wrap gap-2">
                             <p class="text-xs text-gray-400">কোনো পেন্ডিং ডাটা নেই</p>
                         </div>
                     </div>
 
-                    <!-- 6.2 BATCH ACTIONS TOOLBAR -->
-                    <div class="stat-card p-3 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-blue-50/50 border border-blue-200">
-                        <div class="flex items-center gap-3">
-                            <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 bg-white px-3 py-1.5 rounded-lg border shadow-sm">
-                                <input type="checkbox" id="select-all-work-cb" onchange="window.toggleSelectAllWork(this.checked)" class="w-4 h-4 text-blue-600 rounded">
-                                <span>Select All Pending (<span id="total-pending-subs-badge">0</span>)</span>
-                            </label>
-                            <span class="text-xs text-gray-600">সিলেক্টেড: <b id="selected-work-count" class="text-blue-600 font-mono">0</b> টি</span>
+                    <!-- 6.2 GMAIL BULK UPLOAD & MATCHING ACTIONS (REPLACED SELECT ALL) -->
+                    <div class="stat-card p-4 mb-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border border-blue-200 space-y-3">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-xs font-black text-gray-800 uppercase flex items-center gap-1.5">
+                                    <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-600"></i>
+                                    <span>জিমেইল/অ্যাকাউন্ট তালিকা পেস্ট করে বাল্ক একশন:</span>
+                                </h3>
+                                <p class="text-[11px] text-gray-500">যেসব একাউন্ট Approve বা Reject করতে চান তা নিচে প্রতি লাইনে পেস্ট করুন (যেমন: skmahia9601@gmail.com)</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="window.executeBulkGmailMatchAction('approve')" class="btn btn-success text-xs shadow-sm">
+                                    <i data-lucide="check-check" class="w-4 h-4"></i>
+                                    <span>তালিকাভুক্ত একাউন্ট Approve করুন</span>
+                                </button>
+                                <button onclick="window.executeBulkGmailMatchAction('reject')" class="btn btn-danger text-xs shadow-sm">
+                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                    <span>তালিকাভুক্ত একাউন্ট Reject করুন</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="window.executeBulkWorkAction('approve')" class="btn btn-success text-xs shadow-sm">
-                                <i data-lucide="check-check" class="w-4 h-4"></i>
-                                <span>Bulk Approved & Pay</span>
-                            </button>
-                            <button onclick="window.executeBulkWorkAction('reject')" class="btn btn-danger text-xs shadow-sm">
-                                <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                <span>Bulk Reject</span>
-                            </button>
+
+                        <div>
+                            <textarea id="bulk-gmail-action-input" oninput="window.updateBulkGmailPreviewCount()" rows="3" placeholder="skmahia9601@gmail.com&#10;skmahia961@gmail.com" class="w-full p-2.5 rounded-xl border border-gray-300 font-mono text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-800"></textarea>
+                        </div>
+
+                        <div class="flex justify-between items-center text-[11px] font-bold text-gray-600">
+                            <span>পেস্ট করা ইউনিক একাউন্ট: <b id="pasted-unique-count" class="text-indigo-600 font-mono">0</b> টি</span>
+                            <span>পেন্ডিং তালিকার সাথে ম্যাচ হয়েছে: <b id="matched-pending-count" class="text-emerald-600 font-mono">0</b> টি</span>
                         </div>
                     </div>
 
+                    <!-- 6.3 SUBMISSIONS TABLE -->
                     <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
                         <table>
                             <thead>
                                 <tr>
-                                    <th class="w-10 text-center">#</th>
                                     <th>User Info</th>
-                                    <th>Task Type</th>
+                                    <th>Task Category</th>
                                     <th>Reward</th>
-                                    <th>Submitted Data (Credentials)</th>
+                                    <th>Submitted Account & Credentials</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
@@ -855,9 +869,9 @@
         let masterAppUnsubscribe = null;
         let liveTimerInterval = null;
 
-        // Work Submissions Batch Selection and Caching
+        // Pending Submissions Cache & Selected Category View Filter
         let cachedPendingSubmissions = [];
-        let selectedWorkIds = new Set();
+        let currentSelectedCategoryView = 'ALL';
 
         window.onload = () => {
             lucide.createIcons();
@@ -1595,68 +1609,31 @@
         };
 
         // ========================================================
-        // 6. WORK SUBMISSIONS WITH CATEGORY EXPORT & BULK ACTIONS
+        // 6. WORK SUBMISSIONS WITH CATEGORY LIVE VIEW & GMAIL MATCH BULK ACTIONS
         // ========================================================
         function loadWorkSubmissions() {
             const tableBody = document.getElementById('work-submissions-table-body');
-            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading work submissions...</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading work submissions...</td></tr>`;
             const q = query(collection(dbWork, "work_submissions"), where("status", "==", "pending"), orderBy("submittedAt", "desc"));
 
             workUnsubscribe = onSnapshot(q, (snapshot) => {
-                selectedWorkIds.clear();
-                updateSelectedWorkCountUI();
-
                 if (snapshot.empty) {
                     cachedPendingSubmissions = [];
-                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending work proofs to review.</td></tr>`;
-                    document.getElementById('total-pending-subs-badge').textContent = '0';
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending work proofs to review.</td></tr>`;
                     renderWorkCategoryExportPills();
+                    window.updateBulkGmailPreviewCount();
                     return;
                 }
 
                 cachedPendingSubmissions = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-                document.getElementById('total-pending-subs-badge').textContent = cachedPendingSubmissions.length;
 
                 renderWorkCategoryExportPills();
-
-                tableBody.innerHTML = cachedPendingSubmissions.map((sub, idx) => {
-                    const subId = sub.id;
-                    const date = sub.submittedAt?.toDate ? sub.submittedAt.toDate().toLocaleString('en-GB') : 'Just now';
-                    const isMaster = !!sub.isMasterTask;
-                    const isSelected = selectedWorkIds.has(subId);
-
-                    return `<tr class="hover:bg-slate-50 transition">
-                        <td class="text-center">
-                            <input type="checkbox" onchange="window.toggleSingleWorkSelect('${subId}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded">
-                        </td>
-                        <td>
-                            <p class="font-bold text-gray-800 text-xs">${sub.userName || 'User'}</p>
-                            <p class="text-[11px] font-mono text-gray-500">TG: ${sub.userId}</p>
-                        </td>
-                        <td>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-black ${isMaster ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800'}">
-                                ${isMaster ? 'MASTER' : 'VIP 0'}
-                            </span>
-                            <p class="font-bold text-xs text-gray-800 mt-1">${sub.category || sub.jobTitle}</p>
-                        </td>
-                        <td class="font-black text-emerald-600 text-xs">৳${parseFloat(sub.reward || 0).toFixed(2)}</td>
-                        <td class="max-w-xs">
-                            <div class="bg-gray-50 p-2 rounded-lg border font-mono text-[11px] text-gray-700 break-all select-all">
-                                ${sub.proof || sub.accountIdentifier || 'N/A'}
-                            </div>
-                        </td>
-                        <td class="text-xs text-gray-500 whitespace-nowrap">${date}</td>
-                        <td class="space-x-1.5 whitespace-nowrap">
-                            <button class="btn btn-success text-xs" onclick="window.approveWorkSubmission('${subId}', '${sub.userId}', ${sub.reward}, '${sub.jobTitle}')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve</button>
-                            <button class="btn btn-danger text-xs" onclick="window.rejectWorkSubmission('${subId}', '${sub.userId}', '${sub.jobTitle}')">Reject</button>
-                        </td>
-                    </tr>`;
-                }).join('');
-                lucide.createIcons();
+                renderFilteredSubmissionsTable();
+                window.updateBulkGmailPreviewCount();
             });
         }
 
-        // Render Dynamic Category Pills for Download & Copy
+        // Render Dynamic Category Pills for Filter & Pure Pending Download
         function renderWorkCategoryExportPills() {
             const container = document.getElementById('category-export-pill-container');
             if (!container) return;
@@ -1673,52 +1650,124 @@
                 groups[cat].push(sub);
             });
 
-            container.innerHTML = Object.keys(groups).map(catName => {
+            let pillsHTML = `
+                <button onclick="window.selectCategoryFilterView('ALL')" class="category-tab-pill ${currentSelectedCategoryView === 'ALL' ? 'active' : 'bg-white text-gray-700'} border border-gray-300 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm inline-flex items-center gap-1.5">
+                    <span>সকল পেন্ডিং (All)</span>
+                    <span class="count-badge bg-gray-200 text-gray-800 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]">${cachedPendingSubmissions.length}</span>
+                </button>
+            `;
+
+            pillsHTML += Object.keys(groups).map(catName => {
                 const count = groups[catName].length;
+                const isCurrentActive = currentSelectedCategoryView === catName;
                 return `
-                    <div class="inline-flex items-center gap-1.5 bg-white border border-gray-300 px-3 py-1.5 rounded-xl text-xs shadow-sm">
-                        <span class="font-bold text-gray-800">${catName}</span>
-                        <span class="bg-blue-100 text-blue-700 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]">${count}</span>
-                        <div class="flex items-center gap-1 ml-1 border-l pl-2 border-gray-200">
-                            <button onclick="window.exportPendingCategoryXLSX('${catName}')" class="p-1 hover:bg-emerald-50 text-emerald-600 rounded transition" title="${catName} এক্সেল ডাউনলোড">
+                    <div class="category-tab-pill ${isCurrentActive ? 'active' : 'bg-white text-gray-700'} inline-flex items-center gap-1.5 border border-gray-300 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
+                        <span onclick="window.selectCategoryFilterView('${catName}')" class="cursor-pointer select-none">${catName}</span>
+                        <span class="count-badge bg-blue-100 text-blue-700 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]">${count}</span>
+                        <div class="flex items-center gap-1 ml-1 border-l pl-2 border-gray-300">
+                            <button onclick="window.exportPurePendingCategoryXLSX('${catName}')" class="p-1 hover:bg-emerald-100 text-emerald-600 rounded transition" title="${catName} এর পেন্ডিং ডাটা এক্সেল ডাউনলোড">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                             </button>
-                            <button onclick="window.copyPendingCategoryText('${catName}')" class="p-1 hover:bg-blue-50 text-blue-600 rounded transition" title="${catName} টেক্সট কপি">
+                            <button onclick="window.copyPurePendingCategoryText('${catName}')" class="p-1 hover:bg-blue-100 text-blue-600 rounded transition" title="${catName} এর পেন্ডিং ডাটা কপি">
                                 <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            container.innerHTML = pillsHTML;
             lucide.createIcons();
         }
 
-        // Dynamic Export of Category to XLSX
-        window.exportPendingCategoryXLSX = (catName) => {
-            const filtered = cachedPendingSubmissions.filter(s => (s.category || s.jobTitle || 'Other').toUpperCase() === catName);
-            if (filtered.length === 0) return showAlert("কোনো ডাটা পাওয়া যায়নি!");
+        window.selectCategoryFilterView = (catName) => {
+            currentSelectedCategoryView = catName;
+            renderWorkCategoryExportPills();
+            renderFilteredSubmissionsTable();
+        };
+
+        function renderFilteredSubmissionsTable() {
+            const tableBody = document.getElementById('work-submissions-table-body');
+            if (!tableBody) return;
+
+            let displayList = cachedPendingSubmissions;
+            if (currentSelectedCategoryView !== 'ALL') {
+                displayList = cachedPendingSubmissions.filter(s => (s.category || s.jobTitle || 'Other').toUpperCase() === currentSelectedCategoryView);
+            }
+
+            if (displayList.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">${currentSelectedCategoryView} ক্যাটাগরিতে কোনো পেন্ডিং একাউন্ট নেই।</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = displayList.map(sub => {
+                const subId = sub.id;
+                const date = sub.submittedAt?.toDate ? sub.submittedAt.toDate().toLocaleString('en-GB') : 'Just now';
+                const isMaster = !!sub.isMasterTask;
+                const primaryAccount = sub.accountIdentifier || sub.credentials?.email || sub.credentials?.uid || 'N/A';
+
+                return `<tr class="hover:bg-slate-50 transition">
+                    <td>
+                        <p class="font-bold text-gray-800 text-xs">${sub.userName || 'User'}</p>
+                        <p class="text-[11px] font-mono text-gray-500">TG: ${sub.userId}</p>
+                    </td>
+                    <td>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black ${isMaster ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800'}">
+                            ${isMaster ? 'MASTER' : 'VIP 0'}
+                        </span>
+                        <p class="font-bold text-xs text-gray-800 mt-1">${sub.category || sub.jobTitle}</p>
+                    </td>
+                    <td class="font-black text-emerald-600 text-xs">৳${parseFloat(sub.reward || 0).toFixed(2)}</td>
+                    <td class="max-w-xs">
+                        <div class="font-bold text-xs text-blue-700 font-mono select-all mb-0.5">${primaryAccount}</div>
+                        <div class="bg-gray-50 p-2 rounded-lg border font-mono text-[11px] text-gray-700 break-all select-all">
+                            ${sub.proof || primaryAccount}
+                        </div>
+                    </td>
+                    <td class="text-xs text-gray-500 whitespace-nowrap">${date}</td>
+                    <td class="space-x-1.5 whitespace-nowrap">
+                        <button class="btn btn-success text-xs" onclick="window.approveWorkSubmission('${subId}', '${sub.userId}', ${sub.reward}, '${sub.jobTitle}')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve</button>
+                        <button class="btn btn-danger text-xs" onclick="window.rejectWorkSubmission('${subId}', '${sub.userId}', '${sub.jobTitle}')">Reject</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // Pure Pending Category XLSX Download (Exclusively pending status accounts)
+        window.exportPurePendingCategoryXLSX = (catName) => {
+            const filtered = cachedPendingSubmissions.filter(s => 
+                s.status === 'pending' && 
+                ((s.category || s.jobTitle || 'Other').toUpperCase() === catName)
+            );
+            if (filtered.length === 0) return showAlert(`'${catName}' এ কোনো পেন্ডিং অ্যাকাউন্ট নেই!`);
 
             const rows = filtered.map(item => ({
                 "Email/Account": item.accountIdentifier || item.credentials?.email || item.credentials?.uid || '',
                 "Password": item.credentials?.password || '',
                 "2FA/Extra": item.credentials?.twoFa || item.credentials?.recovery || '',
+                "Expected Password": item.expectedPassword || '',
                 "Reward (BDT)": item.reward || 0,
                 "User TG ID": item.userId || '',
                 "User Name": item.userName || '',
-                "Date": item.submittedAt?.toDate ? item.submittedAt.toDate().toLocaleString('en-GB') : ''
+                "Status": "pending",
+                "Submitted At": item.submittedAt?.toDate ? item.submittedAt.toDate().toLocaleString('en-GB') : ''
             }));
 
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, catName.substring(0, 30));
-            XLSX.writeFile(wb, `${catName}_Pending_${Date.now()}.xlsx`);
-            showAlert(`🎉 ${catName} এর ${filtered.length} টি একাউন্ট XLSX ফাইলে ডাউনলোড হয়েছে!`);
+            XLSX.writeFile(wb, `PENDING_${catName}_${Date.now()}.xlsx`);
+            showAlert(`🎉 '${catName}' এর মোট ${filtered.length} টি পেন্ডিং একাউন্ট সফলভাবে XLSX ডাউনলোড হয়েছে!`);
         };
 
-        // Copy Category Accounts Directly in Tabular / Excel Paste Format
-        window.copyPendingCategoryText = (catName) => {
-            const filtered = cachedPendingSubmissions.filter(s => (s.category || s.jobTitle || 'Other').toUpperCase() === catName);
-            if (filtered.length === 0) return showAlert("কোনো ডাটা পাওয়া যায়নি!");
+        // Pure Pending Category Text Copy
+        window.copyPurePendingCategoryText = (catName) => {
+            const filtered = cachedPendingSubmissions.filter(s => 
+                s.status === 'pending' && 
+                ((s.category || s.jobTitle || 'Other').toUpperCase() === catName)
+            );
+            if (filtered.length === 0) return showAlert(`'${catName}' এ কোনো পেন্ডিং অ্যাকাউন্ট নেই!`);
 
             const lines = filtered.map(item => {
                 const mail = item.accountIdentifier || item.credentials?.email || item.credentials?.uid || '';
@@ -1728,65 +1777,76 @@
             });
 
             navigator.clipboard.writeText(lines.join('\n')).then(() => {
-                showAlert(`📋 মোট ${filtered.length} টি ${catName} একাউন্ট এক্সেল ফরমেটে কপি সম্পন্ন হয়েছে!`);
+                showAlert(`📋 মোট ${filtered.length} টি পেন্ডিং ${catName} একাউন্ট এক্সেল ফরম্যাটে কপি সম্পন্ন হয়েছে!`);
             });
         };
 
-        // Multi-select Checkbox Controls
-        window.toggleSingleWorkSelect = (subId, isChecked) => {
-            if (isChecked) selectedWorkIds.add(subId);
-            else selectedWorkIds.delete(subId);
-            updateSelectedWorkCountUI();
-        };
-
-        window.toggleSelectAllWork = (isChecked) => {
-            if (isChecked) {
-                cachedPendingSubmissions.forEach(s => selectedWorkIds.add(s.id));
-            } else {
-                selectedWorkIds.clear();
-            }
-            loadWorkSubmissionsUIWithState();
-            updateSelectedWorkCountUI();
-        };
-
-        function updateSelectedWorkCountUI() {
-            const countEl = document.getElementById('selected-work-count');
-            if (countEl) countEl.textContent = selectedWorkIds.size;
-            const cbAll = document.getElementById('select-all-work-cb');
-            if (cbAll) {
-                cbAll.checked = selectedWorkIds.size > 0 && selectedWorkIds.size === cachedPendingSubmissions.length;
-            }
+        // Extract clean primary account identifier from line
+        function extractCleanEmailFromLine(line) {
+            if (!line) return "";
+            let token = line.trim();
+            if (token.includes('\t')) token = token.split('\t')[0];
+            else if (token.includes(':')) token = token.split(':')[0];
+            else if (token.includes('|')) token = token.split('|')[0];
+            else if (token.includes(',')) token = token.split(',')[0];
+            else if (token.includes('/')) token = token.split('/')[0];
+            else token = token.split(/\s+/)[0];
+            return token.trim().toLowerCase();
         }
 
-        function loadWorkSubmissionsUIWithState() {
-            const checkboxes = document.querySelectorAll('#work-submissions-table-body input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                const tr = cb.closest('tr');
-                const rowSubId = cb.getAttribute('onchange')?.match(/'([^']+)'/)?.[1];
-                if (rowSubId) {
-                    cb.checked = selectedWorkIds.has(rowSubId);
-                }
+        // Live preview of matching accounts in textarea
+        window.updateBulkGmailPreviewCount = () => {
+            const rawText = document.getElementById('bulk-gmail-action-input')?.value || "";
+            const lines = rawText.split('\n').map(l => extractCleanEmailFromLine(l)).filter(Boolean);
+            const uniquePasted = Array.from(new Set(lines));
+
+            const uniqueEl = document.getElementById('pasted-unique-count');
+            const matchedEl = document.getElementById('matched-pending-count');
+
+            if (uniqueEl) uniqueEl.textContent = uniquePasted.length;
+
+            if (cachedPendingSubmissions.length === 0 || uniquePasted.length === 0) {
+                if (matchedEl) matchedEl.textContent = '0';
+                return;
+            }
+
+            const matchedSubs = cachedPendingSubmissions.filter(s => {
+                const acc = (s.accountIdentifier || s.credentials?.email || s.credentials?.uid || '').trim().toLowerCase();
+                return uniquePasted.includes(acc);
             });
-        }
 
-        // Execute Bulk Approval or Rejection
-        window.executeBulkWorkAction = (actionType) => {
-            if (selectedWorkIds.size === 0) {
-                return showAlert("অনুগ্রহ করে অন্তত একটি বা একাধিক সাবমিশন সিলেক্ট করুন!");
+            if (matchedEl) matchedEl.textContent = matchedSubs.length;
+        };
+
+        // Bulk Match & Execute Action by Pasted Gmails/Accounts
+        window.executeBulkGmailMatchAction = (actionType) => {
+            const rawText = document.getElementById('bulk-gmail-action-input')?.value || "";
+            const lines = rawText.split('\n').map(l => extractCleanEmailFromLine(l)).filter(Boolean);
+            const uniquePasted = Array.from(new Set(lines));
+
+            if (uniquePasted.length === 0) {
+                return showAlert("অনুগ্রহ করে টেক্সটবক্সে অন্তত একটি জিমেইল বা একাউন্ট পেস্ট করুন!");
             }
 
-            const targetSubs = cachedPendingSubmissions.filter(s => selectedWorkIds.has(s.id));
+            const matchedSubs = cachedPendingSubmissions.filter(s => {
+                const acc = (s.accountIdentifier || s.credentials?.email || s.credentials?.uid || '').trim().toLowerCase();
+                return uniquePasted.includes(acc);
+            });
+
+            if (matchedSubs.length === 0) {
+                return showAlert("❌ পেস্ট করা কোনো অ্যাকাউন্টের সাথে পেন্ডিং তালিকার কোনো মিল পাওয়া যায়নি!");
+            }
+
             const isApprove = actionType === 'approve';
+            const promptText = isApprove
+                ? `পেন্ডিং তালিকার সাথে মোট ${matchedSubs.length} টি অ্যাকাউন্ট মিলেছে।\nআপনি কি নিশ্চিত যে এগুলো APPROVE করবেন? সাথে সাথে ইউজারদের ব্যালেন্সে টাকা জমা হবে।`
+                : `পেন্ডিং তালিকার সাথে মোট ${matchedSubs.length} টি অ্যাকাউন্ট মিলেছে।\nআপনি কি নিশ্চিত যে এগুলো REJECT করবেন?`;
 
-            const confirmMsg = isApprove 
-                ? `আপনি কি নিশ্চিত যে সিলেক্টেড ${targetSubs.length} টি কাজ APPROVED করবেন?\nপ্রতিটি ব্যবহারকারীর ব্যালেন্সে স্বয়ংক্রিয়ভাবে পারিশ্রমিক যুক্ত হবে।`
-                : `আপনি কি নিশ্চিত যে সিলেক্টেড ${targetSubs.length} টি কাজ REJECT করবেন?`;
-
-            showConfirm(confirmMsg, async () => {
+            showConfirm(promptText, async () => {
                 try {
-                    let processedCount = 0;
+                    let processed = 0;
 
-                    for (const sub of targetSubs) {
+                    for (const sub of matchedSubs) {
                         const subRef = doc(dbWork, "work_submissions", sub.id);
 
                         if (isApprove) {
@@ -1795,7 +1855,7 @@
                                 balance: increment(parseFloat(sub.reward || 0))
                             });
 
-                            // লেজারে ইনকাম ট্রানজেকশন রেকর্ড
+                            // লেজার রেকর্ড
                             await addDoc(collection(dbUser, "users", String(sub.userId), "ledger"), {
                                 type: "income",
                                 title: `কাজের পারিশ্রমিক (${sub.category || sub.jobTitle})`,
@@ -1819,14 +1879,14 @@
 
                             await sendInAppNotification(sub.userId, "কাজের সাবমিশন বাতিল", `${sub.jobTitle} কাজের তথ্য সঠিক না থাকায় বাতিল করা হয়েছে।`);
                         }
-                        processedCount++;
+                        processed++;
                     }
 
-                    selectedWorkIds.clear();
-                    updateSelectedWorkCountUI();
-                    showAlert(`🎉 মোট ${processedCount} টি কাজ সফলভাবে ${isApprove ? 'APPROVED' : 'REJECTED'} করা হয়েছে!`);
+                    document.getElementById('bulk-gmail-action-input').value = '';
+                    window.updateBulkGmailPreviewCount();
+                    showAlert(`🎉 মোট ${processed} টি অ্যাকাউন্ট সফলভাবে ${isApprove ? 'APPROVED' : 'REJECTED'} সম্পন্ন হয়েছে!`);
                 } catch(e) {
-                    showAlert("বাল্ক অপারেশনে ত্রুটি: " + e.message);
+                    showAlert("বাল্ক প্রসেসিংয়ে সমস্যা: " + e.message);
                 }
             });
         };
@@ -2179,6 +2239,7 @@
 
                 await batch.commit();
 
+                // Sync with primary config for instant real-time rate update in user app
                 await setDoc(doc(dbUser, "config", "main"), {
                     sellServices: newServices,
                     vip0SellRate: primaryGmailRate
@@ -2318,6 +2379,7 @@
 
                 await batch.commit();
 
+                // Sync with primary config for instant real-time rate update in user app
                 await setDoc(doc(dbUser, "config", "main"), {
                     masterServices: newMasterTasks,
                     masterSellRate: primaryMasterRate
