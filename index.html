@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Dynamic Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
         .sidebar { background-color: #0f172a; color: #94a3b8; }
@@ -276,18 +278,68 @@
                     </div>
                 </div>
 
-                <!-- 6. WORK SUBMISSIONS PAGE -->
+                <!-- 6. WORK SUBMISSIONS PAGE (WITH BULK EXPORT, COPY & BATCH APPROVE/REJECT) -->
                 <div id="work-submissions-page" class="page">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Work Submissions (VIP 0 & Master Tasks)</h1>
-                            <p class="text-xs text-gray-500">ব্যবহারকারীদের জমা দেওয়া কাজের প্রুফ (Gmail/Pass/2FA) যাচাই করে ব্যালেন্স অ্যাপ্রুভ করুন</p>
+                            <p class="text-xs text-gray-500">পেন্ডিং কাজ ক্যাটাগরি অনুসারে আলাদা ডাউনলোড ও বাল্ক ভেরিফাই করুন</p>
                         </div>
-                        <span class="text-xs bg-indigo-100 text-indigo-900 px-3 py-1 rounded-full font-bold">Task Review Engine</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="loadWorkSubmissions()" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- 6.1 CATEGORY WISE DOWNLOAD & COPY TOOLBAR -->
+                    <div class="stat-card p-4 mb-4 space-y-3">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+                            <span class="text-xs font-black text-gray-700 uppercase flex items-center gap-1.5">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-blue-600"></i>
+                                <span>ক্যাটাগরি ভিত্তিক পেন্ডিং একাউন্ট এক্সপোর্ট:</span>
+                            </span>
+                            <span class="text-[11px] text-gray-400">প্রতিটি ক্যাটাগরি আলাদাভাবে এক্সেল ডাউনলোড ও কপি করতে পারবেন</span>
+                        </div>
+                        <div id="category-export-pill-container" class="flex flex-wrap gap-2">
+                            <p class="text-xs text-gray-400">কোনো পেন্ডিং ডাটা নেই</p>
+                        </div>
+                    </div>
+
+                    <!-- 6.2 BATCH ACTIONS TOOLBAR -->
+                    <div class="stat-card p-3 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-blue-50/50 border border-blue-200">
+                        <div class="flex items-center gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 bg-white px-3 py-1.5 rounded-lg border shadow-sm">
+                                <input type="checkbox" id="select-all-work-cb" onchange="window.toggleSelectAllWork(this.checked)" class="w-4 h-4 text-blue-600 rounded">
+                                <span>Select All Pending (<span id="total-pending-subs-badge">0</span>)</span>
+                            </label>
+                            <span class="text-xs text-gray-600">সিলেক্টেড: <b id="selected-work-count" class="text-blue-600 font-mono">0</b> টি</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.executeBulkWorkAction('approve')" class="btn btn-success text-xs shadow-sm">
+                                <i data-lucide="check-check" class="w-4 h-4"></i>
+                                <span>Bulk Approved & Pay</span>
+                            </button>
+                            <button onclick="window.executeBulkWorkAction('reject')" class="btn btn-danger text-xs shadow-sm">
+                                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                <span>Bulk Reject</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-x-auto">
                         <table>
-                            <thead><tr><th>User Info</th><th>Task Type</th><th>Reward</th><th>Submitted Data (Credentials)</th><th>Date</th><th>Actions</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th class="w-10 text-center">#</th>
+                                    <th>User Info</th>
+                                    <th>Task Type</th>
+                                    <th>Reward</th>
+                                    <th>Submitted Data (Credentials)</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
                             <tbody id="work-submissions-table-body"></tbody>
                         </table>
                     </div>
@@ -802,6 +854,10 @@
         let withdrawUnsubscribe = null;
         let masterAppUnsubscribe = null;
         let liveTimerInterval = null;
+
+        // Work Submissions Batch Selection and Caching
+        let cachedPendingSubmissions = [];
+        let selectedWorkIds = new Set();
 
         window.onload = () => {
             lucide.createIcons();
@@ -1444,7 +1500,7 @@
             });
         };
 
-        // --- MASTER WORK APPLICATIONS (Updated to sync user document & reject timer) ---
+        // --- MASTER WORK APPLICATIONS ---
         function loadMasterApplications() {
             const tableBody = document.getElementById('master-apps-table-body');
             tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading applications...</td></tr>`;
@@ -1507,10 +1563,8 @@
                         updatePayload.rejectedAt = serverTimestamp();
                     }
 
-                    // Update application document in Secondary DB
                     await updateDoc(doc(dbWork, "master_training_applications", appId), updatePayload);
 
-                    // Sync user document in Primary DB
                     const userRef = doc(dbUser, "users", String(userId));
                     if (isApproved) {
                         await updateDoc(userRef, {
@@ -1540,34 +1594,50 @@
             });
         };
 
-        // --- WORK SUBMISSIONS ---
+        // ========================================================
+        // 6. WORK SUBMISSIONS WITH CATEGORY EXPORT & BULK ACTIONS
+        // ========================================================
         function loadWorkSubmissions() {
             const tableBody = document.getElementById('work-submissions-table-body');
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs">Loading work submissions...</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs">Loading work submissions...</td></tr>`;
             const q = query(collection(dbWork, "work_submissions"), where("status", "==", "pending"), orderBy("submittedAt", "desc"));
 
             workUnsubscribe = onSnapshot(q, (snapshot) => {
+                selectedWorkIds.clear();
+                updateSelectedWorkCountUI();
+
                 if (snapshot.empty) {
-                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending work proofs to review.</td></tr>`;
+                    cachedPendingSubmissions = [];
+                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500 font-semibold text-xs">No pending work proofs to review.</td></tr>`;
+                    document.getElementById('total-pending-subs-badge').textContent = '0';
+                    renderWorkCategoryExportPills();
                     return;
                 }
 
-                tableBody.innerHTML = snapshot.docs.map(docSnap => {
-                    const sub = docSnap.data();
-                    const subId = docSnap.id;
-                    const date = sub.submittedAt?.toDate().toLocaleString('en-GB') || 'Just now';
-                    const isMaster = !!sub.isMasterTask;
+                cachedPendingSubmissions = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                document.getElementById('total-pending-subs-badge').textContent = cachedPendingSubmissions.length;
 
-                    return `<tr>
+                renderWorkCategoryExportPills();
+
+                tableBody.innerHTML = cachedPendingSubmissions.map((sub, idx) => {
+                    const subId = sub.id;
+                    const date = sub.submittedAt?.toDate ? sub.submittedAt.toDate().toLocaleString('en-GB') : 'Just now';
+                    const isMaster = !!sub.isMasterTask;
+                    const isSelected = selectedWorkIds.has(subId);
+
+                    return `<tr class="hover:bg-slate-50 transition">
+                        <td class="text-center">
+                            <input type="checkbox" onchange="window.toggleSingleWorkSelect('${subId}', this.checked)" ${isSelected ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded">
+                        </td>
                         <td>
                             <p class="font-bold text-gray-800 text-xs">${sub.userName || 'User'}</p>
                             <p class="text-[11px] font-mono text-gray-500">TG: ${sub.userId}</p>
                         </td>
                         <td>
                             <span class="px-2 py-0.5 rounded text-[10px] font-black ${isMaster ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800'}">
-                                ${isMaster ? 'MASTER TASK' : 'VIP 0 SELL'}
+                                ${isMaster ? 'MASTER' : 'VIP 0'}
                             </span>
-                            <p class="font-bold text-xs text-gray-800 mt-1">${sub.jobTitle}</p>
+                            <p class="font-bold text-xs text-gray-800 mt-1">${sub.category || sub.jobTitle}</p>
                         </td>
                         <td class="font-black text-emerald-600 text-xs">৳${parseFloat(sub.reward || 0).toFixed(2)}</td>
                         <td class="max-w-xs">
@@ -1575,9 +1645,9 @@
                                 ${sub.proof || sub.accountIdentifier || 'N/A'}
                             </div>
                         </td>
-                        <td class="text-xs text-gray-500">${date}</td>
+                        <td class="text-xs text-gray-500 whitespace-nowrap">${date}</td>
                         <td class="space-x-1.5 whitespace-nowrap">
-                            <button class="btn btn-success text-xs" onclick="window.approveWorkSubmission('${subId}', '${sub.userId}', ${sub.reward}, '${sub.jobTitle}')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve & Pay</button>
+                            <button class="btn btn-success text-xs" onclick="window.approveWorkSubmission('${subId}', '${sub.userId}', ${sub.reward}, '${sub.jobTitle}')"><i data-lucide="check" class="w-3.5 h-3.5"></i> Approve</button>
                             <button class="btn btn-danger text-xs" onclick="window.rejectWorkSubmission('${subId}', '${sub.userId}', '${sub.jobTitle}')">Reject</button>
                         </td>
                     </tr>`;
@@ -1585,6 +1655,181 @@
                 lucide.createIcons();
             });
         }
+
+        // Render Dynamic Category Pills for Download & Copy
+        function renderWorkCategoryExportPills() {
+            const container = document.getElementById('category-export-pill-container');
+            if (!container) return;
+
+            if (cachedPendingSubmissions.length === 0) {
+                container.innerHTML = `<span class="text-xs text-gray-400">কোনো পেন্ডিং সাবমিশন নেই</span>`;
+                return;
+            }
+
+            const groups = {};
+            cachedPendingSubmissions.forEach(sub => {
+                const cat = (sub.category || sub.jobTitle || 'Other').toUpperCase();
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(sub);
+            });
+
+            container.innerHTML = Object.keys(groups).map(catName => {
+                const count = groups[catName].length;
+                return `
+                    <div class="inline-flex items-center gap-1.5 bg-white border border-gray-300 px-3 py-1.5 rounded-xl text-xs shadow-sm">
+                        <span class="font-bold text-gray-800">${catName}</span>
+                        <span class="bg-blue-100 text-blue-700 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]">${count}</span>
+                        <div class="flex items-center gap-1 ml-1 border-l pl-2 border-gray-200">
+                            <button onclick="window.exportPendingCategoryXLSX('${catName}')" class="p-1 hover:bg-emerald-50 text-emerald-600 rounded transition" title="${catName} এক্সেল ডাউনলোড">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="window.copyPendingCategoryText('${catName}')" class="p-1 hover:bg-blue-50 text-blue-600 rounded transition" title="${catName} টেক্সট কপি">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // Dynamic Export of Category to XLSX
+        window.exportPendingCategoryXLSX = (catName) => {
+            const filtered = cachedPendingSubmissions.filter(s => (s.category || s.jobTitle || 'Other').toUpperCase() === catName);
+            if (filtered.length === 0) return showAlert("কোনো ডাটা পাওয়া যায়নি!");
+
+            const rows = filtered.map(item => ({
+                "Email/Account": item.accountIdentifier || item.credentials?.email || item.credentials?.uid || '',
+                "Password": item.credentials?.password || '',
+                "2FA/Extra": item.credentials?.twoFa || item.credentials?.recovery || '',
+                "Reward (BDT)": item.reward || 0,
+                "User TG ID": item.userId || '',
+                "User Name": item.userName || '',
+                "Date": item.submittedAt?.toDate ? item.submittedAt.toDate().toLocaleString('en-GB') : ''
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, catName.substring(0, 30));
+            XLSX.writeFile(wb, `${catName}_Pending_${Date.now()}.xlsx`);
+            showAlert(`🎉 ${catName} এর ${filtered.length} টি একাউন্ট XLSX ফাইলে ডাউনলোড হয়েছে!`);
+        };
+
+        // Copy Category Accounts Directly in Tabular / Excel Paste Format
+        window.copyPendingCategoryText = (catName) => {
+            const filtered = cachedPendingSubmissions.filter(s => (s.category || s.jobTitle || 'Other').toUpperCase() === catName);
+            if (filtered.length === 0) return showAlert("কোনো ডাটা পাওয়া যায়নি!");
+
+            const lines = filtered.map(item => {
+                const mail = item.accountIdentifier || item.credentials?.email || item.credentials?.uid || '';
+                const pass = item.credentials?.password || '';
+                const extra = item.credentials?.twoFa || item.credentials?.recovery || '';
+                return `${mail}\t${pass}\t${extra}`.trim();
+            });
+
+            navigator.clipboard.writeText(lines.join('\n')).then(() => {
+                showAlert(`📋 মোট ${filtered.length} টি ${catName} একাউন্ট এক্সেল ফরমেটে কপি সম্পন্ন হয়েছে!`);
+            });
+        };
+
+        // Multi-select Checkbox Controls
+        window.toggleSingleWorkSelect = (subId, isChecked) => {
+            if (isChecked) selectedWorkIds.add(subId);
+            else selectedWorkIds.delete(subId);
+            updateSelectedWorkCountUI();
+        };
+
+        window.toggleSelectAllWork = (isChecked) => {
+            if (isChecked) {
+                cachedPendingSubmissions.forEach(s => selectedWorkIds.add(s.id));
+            } else {
+                selectedWorkIds.clear();
+            }
+            loadWorkSubmissionsUIWithState();
+            updateSelectedWorkCountUI();
+        };
+
+        function updateSelectedWorkCountUI() {
+            const countEl = document.getElementById('selected-work-count');
+            if (countEl) countEl.textContent = selectedWorkIds.size;
+            const cbAll = document.getElementById('select-all-work-cb');
+            if (cbAll) {
+                cbAll.checked = selectedWorkIds.size > 0 && selectedWorkIds.size === cachedPendingSubmissions.length;
+            }
+        }
+
+        function loadWorkSubmissionsUIWithState() {
+            const checkboxes = document.querySelectorAll('#work-submissions-table-body input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                const tr = cb.closest('tr');
+                const rowSubId = cb.getAttribute('onchange')?.match(/'([^']+)'/)?.[1];
+                if (rowSubId) {
+                    cb.checked = selectedWorkIds.has(rowSubId);
+                }
+            });
+        }
+
+        // Execute Bulk Approval or Rejection
+        window.executeBulkWorkAction = (actionType) => {
+            if (selectedWorkIds.size === 0) {
+                return showAlert("অনুগ্রহ করে অন্তত একটি বা একাধিক সাবমিশন সিলেক্ট করুন!");
+            }
+
+            const targetSubs = cachedPendingSubmissions.filter(s => selectedWorkIds.has(s.id));
+            const isApprove = actionType === 'approve';
+
+            const confirmMsg = isApprove 
+                ? `আপনি কি নিশ্চিত যে সিলেক্টেড ${targetSubs.length} টি কাজ APPROVED করবেন?\nপ্রতিটি ব্যবহারকারীর ব্যালেন্সে স্বয়ংক্রিয়ভাবে পারিশ্রমিক যুক্ত হবে।`
+                : `আপনি কি নিশ্চিত যে সিলেক্টেড ${targetSubs.length} টি কাজ REJECT করবেন?`;
+
+            showConfirm(confirmMsg, async () => {
+                try {
+                    let processedCount = 0;
+
+                    for (const sub of targetSubs) {
+                        const subRef = doc(dbWork, "work_submissions", sub.id);
+
+                        if (isApprove) {
+                            const userRef = doc(dbUser, "users", String(sub.userId));
+                            await updateDoc(userRef, {
+                                balance: increment(parseFloat(sub.reward || 0))
+                            });
+
+                            // লেজারে ইনকাম ট্রানজেকশন রেকর্ড
+                            await addDoc(collection(dbUser, "users", String(sub.userId), "ledger"), {
+                                type: "income",
+                                title: `কাজের পারিশ্রমিক (${sub.category || sub.jobTitle})`,
+                                amount: parseFloat(sub.reward || 0),
+                                isIncome: true,
+                                note: `অ্যাকাউন্ট: ${sub.accountIdentifier || ''}`,
+                                timestamp: serverTimestamp()
+                            });
+
+                            await updateDoc(subRef, {
+                                status: "approved",
+                                approvedAt: serverTimestamp()
+                            });
+
+                            await sendInAppNotification(sub.userId, "কাজের রিওয়ার্ড যুক্ত হয়েছে", `${sub.jobTitle} কাজের জন্য ৳${sub.reward} ওয়ালেটে যুক্ত হয়েছে।`);
+                        } else {
+                            await updateDoc(subRef, {
+                                status: "rejected",
+                                rejectedAt: serverTimestamp()
+                            });
+
+                            await sendInAppNotification(sub.userId, "কাজের সাবমিশন বাতিল", `${sub.jobTitle} কাজের তথ্য সঠিক না থাকায় বাতিল করা হয়েছে।`);
+                        }
+                        processedCount++;
+                    }
+
+                    selectedWorkIds.clear();
+                    updateSelectedWorkCountUI();
+                    showAlert(`🎉 মোট ${processedCount} টি কাজ সফলভাবে ${isApprove ? 'APPROVED' : 'REJECTED'} করা হয়েছে!`);
+                } catch(e) {
+                    showAlert("বাল্ক অপারেশনে ত্রুটি: " + e.message);
+                }
+            });
+        };
 
         window.approveWorkSubmission = (subId, userId, reward, jobTitle) => {
             showConfirm(`Are you sure you want to APPROVE this work and add ৳${reward} to User TG ID: ${userId}?`, async () => {
@@ -1594,6 +1839,14 @@
 
                     await updateDoc(subRef, { status: "approved", approvedAt: serverTimestamp() });
                     await updateDoc(userRef, { balance: increment(parseFloat(reward)) });
+
+                    await addDoc(collection(dbUser, "users", String(userId), "ledger"), {
+                        type: "income",
+                        title: `কাজের পারিশ্রমিক (${jobTitle})`,
+                        amount: parseFloat(reward),
+                        isIncome: true,
+                        timestamp: serverTimestamp()
+                    });
 
                     await sendInAppNotification(userId, "কাজের রিওয়ার্ড যুক্ত হয়েছে", `${jobTitle} কাজের জন্য ৳${reward} আপনার ওয়ালেটে সফলভাবে যুক্ত হয়েছে।`);
                     showAlert("কাজ সফলভাবে অ্যাপ্রুভ এবং ইউজারের ব্যালেন্স যোগ হয়েছে!");
@@ -1876,8 +2129,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Lucide Icon</label>
-                        <input type="text" placeholder="mail, facebook" class="p-2 border rounded-lg w-full text-xs font-mono" data-srv="icon" value="${srv.icon || 'shield-check'}">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Lucide Icon or Image URL</label>
+                        <input type="text" placeholder="mail, facebook or https://..." class="p-2 border rounded-lg w-full text-xs font-mono" data-srv="icon" value="${srv.icon || 'shield-check'}">
                     </div>
                 </div>
 
@@ -1926,7 +2179,6 @@
 
                 await batch.commit();
 
-                // Sync with primary config for instant real-time rate update in user app
                 await setDoc(doc(dbUser, "config", "main"), {
                     sellServices: newServices,
                     vip0SellRate: primaryGmailRate
@@ -2014,8 +2266,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Icon</label>
-                        <input type="text" placeholder="mail-check, crown" class="p-2 border rounded-lg w-full text-xs font-mono" data-mtask="icon" value="${task.icon || 'shield-check'}">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">Icon or Image URL</label>
+                        <input type="text" placeholder="mail-check, crown or https://..." class="p-2 border rounded-lg w-full text-xs font-mono" data-mtask="icon" value="${task.icon || 'shield-check'}">
                     </div>
                 </div>
 
@@ -2066,7 +2318,6 @@
 
                 await batch.commit();
 
-                // Sync with primary config for instant real-time rate update in user app
                 await setDoc(doc(dbUser, "config", "main"), {
                     masterServices: newMasterTasks,
                     masterSellRate: primaryMasterRate
